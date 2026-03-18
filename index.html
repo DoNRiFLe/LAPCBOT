@@ -28,33 +28,34 @@
         <h3>📍 1. Check-in de Jugadores</h3>
         <div class="checkbox-group" id="checkinArea">⏳ Conectando con el Padrón...</div>
     </div>
-	<div class="section-card">
-    <h3>📅 0. Datos de la Jornada</h3>
-    <label>Mes de la Fecha</label>
-    <select id="mesFecha">
-        <option value="Enero">Enero</option>
-        <option value="Febrero">Febrero</option>
-        <option value="Marzo">Marzo</option>
-        <option value="Abril">Abril</option>
-        <option value="Mayo">Mayo</option>
-        <option value="Junio">Junio</option>
-        <option value="Julio">Julio</option>
-        <option value="Agosto">Agosto</option>
-        <option value="Septiembre">Septiembre</option>
-        <option value="Octubre">Octubre</option>
-        <option value="Noviembre">Noviembre</option>
-        <option value="Diciembre">Diciembre</option>
-    </select>
     
-    <label>Número de Fecha del Mes</label>
-    <input type="number" id="nroFecha" placeholder="Ej: 1" value="1">
-    
-    <label>Tipo de Torneo</label>
-    <select id="tipoTorneo">
-        <option value="Slam">Slam (Puntos 100%)</option>
-        <option value="GrandSlam">Grand Slam (Puntos 150%)</option>
-    </select>
-</div>
+    <div class="section-card">
+        <h3>📅 0. Datos de la Jornada</h3>
+        <label>Mes de la Fecha</label>
+        <select id="mesFecha">
+            <option value="Enero">Enero</option>
+            <option value="Febrero">Febrero</option>
+            <option value="Marzo">Marzo</option>
+            <option value="Abril">Abril</option>
+            <option value="Mayo">Mayo</option>
+            <option value="Junio">Junio</option>
+            <option value="Julio">Julio</option>
+            <option value="Agosto">Agosto</option>
+            <option value="Septiembre">Septiembre</option>
+            <option value="Octubre">Octubre</option>
+            <option value="Noviembre">Noviembre</option>
+            <option value="Diciembre">Diciembre</option>
+        </select>
+        
+        <label>Número de Fecha del Mes</label>
+        <input type="number" id="nroFecha" placeholder="Ej: 1" value="1">
+        
+        <label>Tipo de Torneo</label>
+        <select id="tipoTorneo">
+            <option value="Slam">Slam (Puntos 100%)</option>
+            <option value="GrandSlam">Grand Slam (Puntos 150%)</option>
+        </select>
+    </div>
     
     <div class="section-card">
         <h3>💰 Configuración de la Fecha</h3>
@@ -82,9 +83,34 @@
 
     <script>
         let tg;
-        try { tg = window.Telegram.WebApp; tg.expand(); } catch(e) {}
+        try { 
+            tg = window.Telegram.WebApp; 
+            tg.expand(); 
+            
+            // 🛡️ PATOVICA DIGITAL: Tu Chat ID
+            const idPermitido = 1149173434; 
+            const usuarioActual = tg.initDataUnsafe?.user?.id;
 
-        const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbxxutR_AQNTtp3HWH9YShPQDuQuDXU0NT8pFuaihvHDmwPg3Opd5f_RucAGdUFfGJw3/exec";
+            if (usuarioActual && usuarioActual !== idPermitido) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; margin-top: 50px;">
+                        <h1 style="color: #ff4444; font-size: 50px;">⛔</h1>
+                        <h2 style="color: #ff4444;">ACCESO DENEGADO</h2>
+                        <p style="color: #ccc;">No tenés autorización para ver este paño.</p>
+                    </div>`;
+                setTimeout(() => { tg.close(); }, 3000);
+                throw new Error("Intruso detectado");
+            }
+        } catch(e) { console.log("Modo navegador o error de seguridad."); }
+
+      // 🛡️ OFUSCACIÓN DE CREDENCIALES (Humo Ninja)
+        // Están convertidas a Base64 para que no se lean a simple vista en el código.
+        const encodedUrl = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4eHV0Ul9BUU5UdHAzSFdIOVlTaFBRRHVRdURYVTBOVDhwRnVhaWh2SERtd1BnM09wZDVmX1J1Y0FHZFVGZkdKdzMvZXhlYw==";
+        const encodedToken = "TEFQQ18yMDI2X1BST19TRUNSRVQ=";
+
+        // El navegador las desencripta en tiempo real (atob) cuando las necesita
+        const googleWebhookUrl = atob(encodedUrl);
+        const MI_TOKEN_SECRETO = atob(encodedToken);
         
         let todosLosJugadores = [];
         let jugadoresPresentes = [];
@@ -92,12 +118,19 @@
 
         async function cargarPadron() {
             try {
-                let response = await fetch(googleWebhookUrl);
+                // Le pasamos el token en la URL para que el patovica de lectura nos deje pasar
+                let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
                 let data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('checkinArea').innerHTML = `❌ ${data.error}`;
+                    return;
+                }
+                
                 todosLosJugadores = data.jugadores || [];
                 renderizarCheckboxes();
             } catch (error) {
-                document.getElementById('checkinArea').innerHTML = "❌ Error leyendo el Padrón. Revisá la URL de Google.";
+                document.getElementById('checkinArea').innerHTML = "❌ Error conectando con la base financiera.";
             }
         }
 
@@ -181,16 +214,8 @@
             }
         }
 
-        // ACÁ EMPIEZA LA FUNCIÓN QUE HABÍAS CORTADO
+        // FUNCIÓN ÚNICA Y LIMPIA
         function enviarDatos() {
-            if(jugadoresPresentes.length === 0) {
-                alert("Primero tenés que tildar quiénes jugaron.");
-                return;
-            }
-
-            document.getElementById('btnLiquidar').innerText = "⏳ PROCESANDO...";
-            
-            function enviarDatos() {
             if(jugadoresPresentes.length === 0) {
                 alert("Primero tenés que tildar quiénes jugaron.");
                 return;
@@ -211,7 +236,6 @@
                 torneo2: {} 
             };
 
-            // Recolección de datos (lo que ya tenías)
             for(let i=1; i<=gastoCount; i++) {
                 const row = document.getElementById(`gasto${i}`);
                 if(row) {
@@ -226,7 +250,9 @@
                 data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || "";
             }
 
+            // ENCAPSULAMOS CON SEGURIDAD
             const formData = new FormData();
+            formData.append("token", MI_TOKEN_SECRETO);
             formData.append("datos", JSON.stringify(data));
 
             fetch(googleWebhookUrl, {
@@ -234,42 +260,29 @@
                 mode: 'no-cors', 
                 body: formData 
             }).then(() => {
-                // GENERACIÓN DEL TEXTO PARA WHATSAPP
                 let resumen = `🏆 *LAPC - ${data.mes.toUpperCase()} / F${data.nroFecha}* 🏆\n`;
                 resumen += `✨ _${data.tipoTorneo}_\n\n`;
                 resumen += `🥇 *T1:* ${data.torneo1.pos1} / *T2:* ${data.torneo2.pos1}\n`;
                 resumen += `🥈 *T1:* ${data.torneo1.pos2} / *T2:* ${data.torneo2.pos2}\n\n`;
                 resumen += `✅ *¡Liquidado en el Excel!*`;
 
-                // Usamos el portapapeles nativo
                 navigator.clipboard.writeText(resumen).then(() => {
                     alert("🚀 ¡FECHA LIQUIDADA!\n\nEl resumen se copió al portapapeles. Andá a WhatsApp y pegalo.");
+                    if(tg) { tg.close(); }
+                }).catch(err => {
+                    alert("🚀 ¡FECHA LIQUIDADA!\n\n(Los datos se guardaron, pero no se pudo copiar al portapapeles automático).");
                     if(tg) { tg.close(); }
                 });
 
                 btn.innerText = "🚀 LIQUIDAR FECHA";
                 btn.disabled = false;
             }).catch(error => { 
-                alert("Error de conexión."); 
+                alert("Error de conexión. Revisá que tengas internet."); 
                 btn.innerText = "🚀 LIQUIDAR FECHA";
                 btn.disabled = false;
             });
-        
-            // FormData para proteger emojis y tildes
-            const formData = new FormData();
-            formData.append("datos", JSON.stringify(data));
-
-            // Disparo a Google
-            fetch(googleWebhookUrl, {
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: formData 
-            }).then(() => {
-                if(tg) { tg.close(); } else { alert("Datos enviados a la LAPC."); }
-            }).catch(error => { alert("Error de conexión."); });
         }
 
-        // Arranca el motor
         window.onload = cargarPadron;
     </script>
 </body>
