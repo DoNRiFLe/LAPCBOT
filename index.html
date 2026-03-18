@@ -103,14 +103,9 @@
             }
         } catch(e) { console.log("Modo navegador o error de seguridad."); }
 
-      // 🛡️ OFUSCACIÓN DE CREDENCIALES (Humo Ninja)
-        // Están convertidas a Base64 para que no se lean a simple vista en el código.
-        const encodedUrl = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4eHV0Ul9BUU5UdHAzSFdIOVlTaFBRRHVRdURYVTBOVDhwRnVhaWh2SERtd1BnM09wZDVmX1J1Y0FHZFVGZkdKdzMvZXhlYw==";
-        const encodedToken = "TEFQQ18yMDI2X1BST19TRUNSRVQ=";
-
-        // El navegador las desencripta en tiempo real (atob) cuando las necesita
-        const googleWebhookUrl = atob(encodedUrl);
-        const MI_TOKEN_SECRETO = atob(encodedToken);
+      // MODO PRUEBA DE FUEGO
+const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbwvXNe06sIwc73aaeVQUObJFM_7tJ-4LTCJpiz1wIOlroi9EqGAbN-kPyP469GLGVOC/exec";
+const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
         let todosLosJugadores = [];
         let jugadoresPresentes = [];
