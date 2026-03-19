@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Paño LAPC</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; --input-bg: #2d2d2d; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 15px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        h2 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; }
+        .section-card { background-color: var(--card-bg); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #32613f; }
+        h3 { border-bottom: 1px solid var(--gold-accent); padding-bottom: 8px; color: var(--gold-accent); margin-top: 0;}
+        label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; color: #e0e0e0; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background-color: var(--input-bg); color: white; box-sizing: border-box; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .checkbox-item { background: #111; padding: 8px 12px; border-radius: 20px; border: 1px solid #444; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+        .checkbox-item input { width: auto; margin: 0; }
+        button { width: 100%; padding: 15px; margin-top: 10px; background-color: var(--gold-accent); color: #111; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-gasto { background-color: #32613f; color: white; margin-bottom: 15px; border: 1px dashed var(--gold-accent); }
+        .gasto-row { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h2>♠️ LAPC ♣️</h2> 
+
+    <div class="section-card">
+        <h3>📍 1. Check-in de Jugadores</h3>
+        <div class="checkbox-group" id="checkinArea">⏳ Conectando con el Padrón...</div>
+    </div>
+    
+    <div class="section-card">
+        <h3>📅 0. Datos de la Jornada</h3>
+        <label>Mes de la Fecha</label>
+        <select id="mesFecha">
+            <option value="Enero">Enero</option>
+            <option value="Febrero">Febrero</option>
+            <option value="Marzo">Marzo</option>
+            <option value="Abril">Abril</option>
+            <option value="Mayo">Mayo</option>
+            <option value="Junio">Junio</option>
+            <option value="Julio">Julio</option>
+            <option value="Agosto">Agosto</option>
+            <option value="Septiembre">Septiembre</option>
+            <option value="Octubre">Octubre</option>
+            <option value="Noviembre">Noviembre</option>
+            <option value="Diciembre">Diciembre</option>
+        </select>
+        
+        <label>Número de Fecha del Mes</label>
+        <input type="number" id="nroFecha" placeholder="Ej: 1" value="1">
+        
+        <label>Tipo de Torneo</label>
+        <select id="tipoTorneo">
+            <option value="Slam">Slam (Puntos 100%)</option>
+            <option value="GrandSlam">Grand Slam (Puntos 150%)</option>
+        </select>
+    </div>
+    
+    <div class="section-card">
+        <h3>💰 Configuración de la Fecha</h3>
+        <label>Valor de la Entrada (Buy-in por Torneo)</label>
+        <input type="number" id="valorBuyIn" value="6000" style="font-weight: bold; color: var(--gold-accent);">
+    </div>
+
+    <div class="section-card">
+        <h3>💸 2. La Caja (Gastos)</h3>
+        <div id="gastosContainer"></div>
+        <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
+    </div>
+
+    <div class="section-card">
+        <h3>🏆 3. Torneo 1</h3>
+        <div id="torneo1"></div>
+    </div>
+
+    <div class="section-card">
+        <h3>🏆 4. Torneo 2</h3>
+        <div id="torneo2"></div>
+    </div>
+
+    <button id="btnLiquidar" onclick="enviarDatos()">🚀 LIQUIDAR FECHA</button>
+
+    <script>
+        let tg;
+        try { 
+            tg = window.Telegram.WebApp; 
+            tg.expand(); 
+            
+            // 🛡️ PATOVICA DIGITAL: Tu Chat ID
+            const idPermitido = 1149173434; 
+            const usuarioActual = tg.initDataUnsafe?.user?.id;
+
+            if (usuarioActual && usuarioActual !== idPermitido) {
+                document.body.innerHTML = `
+                    <div style="text-align: center; margin-top: 50px;">
+                        <h1 style="color: #ff4444; font-size: 50px;">⛔</h1>
+                        <h2 style="color: #ff4444;">ACCESO DENEGADO</h2>
+                        <p style="color: #ccc;">No tenés autorización para ver este paño.</p>
+                    </div>`;
+                setTimeout(() => { tg.close(); }, 3000);
+                throw new Error("Intruso detectado");
+            }
+        } catch(e) { console.log("Modo navegador o error de seguridad."); }
+
+        // 🛡️ OFUSCACIÓN DE CREDENCIALES ACTIVA
+        // Tu URL nueva y tu token pasados por Base64
+        const encodedUrl = "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4YmNkdWVkR1VJX25KZEtoWFkzT0duODJ3MkpnbUdiWHhDaEZCMVpUS3hIakdILTJOdTlBTVJmTU1xaTFYNm5icUkvZXhlYw==";
+        const encodedToken = "TEFQQ18yMDI2X1BST19TRUNSRVQ=";
+
+        // El navegador las desencripta en tiempo real
+        const googleWebhookUrl = atob(encodedUrl);
+        const MI_TOKEN_SECRETO = atob(encodedToken);
+        
+        let todosLosJugadores = [];
+        let jugadoresPresentes = [];
+        let gastoCount = 0;
+
+        async function cargarPadron() {
+            try {
+                let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
+                let data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('checkinArea').innerHTML = `❌ ${data.error}`;
+                    return;
+                }
+                
+                todosLosJugadores = data.jugadores || [];
+                renderizarCheckboxes();
+            } catch (error) {
+                document.getElementById('checkinArea').innerHTML = "❌ Error conectando con la base financiera.";
+            }
+        }
+
+        function renderizarCheckboxes() {
+            const checkinArea = document.getElementById('checkinArea');
+            checkinArea.innerHTML = '';
+            todosLosJugadores.forEach(j => {
+                checkinArea.innerHTML += `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${j}" onchange="actualizarPresentes()"> ${j}
+                    </label>`;
+            });
+        }
+
+        function actualizarPresentes() {
+            const checkboxes = document.querySelectorAll('#checkinArea input:checked');
+            jugadoresPresentes = Array.from(checkboxes).map(cb => cb.value);
+            
+            document.getElementById('gastosContainer').innerHTML = '';
+            gastoCount = 0;
+            if (jugadoresPresentes.length > 0) {
+                agregarGasto();
+            }
+            poblarTorneos();
+        }
+
+        function agregarGasto() {
+            gastoCount++;
+            let options = '<option value="">Seleccionar...</option>';
+            jugadoresPresentes.forEach(j => options += `<option value="${j}">${j}</option>`);
+            
+            const html = `
+                <div class="gasto-row" id="gasto${gastoCount}">
+                    <label>¿Quién pagó?</label><select class="pagador">${options}</select>
+                    <label>Monto ($)</label><input type="number" class="monto" placeholder="Ej: 15000">
+                    <label>Concepto</label>
+                    <select class="concepto">
+                        <option value="Asado">🥩 Asado</option>
+                        <option value="Bebida">🍻 Bebida</option>
+                        <option value="Hielo">🧊 Hielo</option>
+                        <option value="Varios">📦 Varios</option>
+                    </select>
+                </div>`;
+            document.getElementById('gastosContainer').insertAdjacentHTML('beforeend', html);
+        }
+
+        function poblarTorneos() {
+            const medallas = ["🥇 1º", "🥈 2º", "🥉 3º", "🏅 4º", "💀 5º", "💀 6º", "💀 7º", "💀 8º", "💀 9º", "💀 10º"];
+            let options = '<option value="">Seleccionar...</option>';
+            jugadoresPresentes.forEach(j => options += `<option value="${j}">${j}</option>`);
+
+            document.getElementById('torneo1').innerHTML = '';
+            document.getElementById('torneo2').innerHTML = '';
+
+            let cantidad = jugadoresPresentes.length;
+
+            for(let i=1; i<=cantidad; i++) {
+                let medalla = medallas[i-1] || `💀 ${i}º`;
+                document.getElementById('torneo1').innerHTML += `<label>${medalla} Puesto</label><select id="t1_pos${i}" onchange="validarUnicos('t1', ${cantidad})">${options}</select>`;
+                document.getElementById('torneo2').innerHTML += `<label>${medalla} Puesto</label><select id="t2_pos${i}" onchange="validarUnicos('t2', ${cantidad})">${options}</select>`;
+            }
+        }
+
+        function validarUnicos(torneo, cantidad) {
+            let seleccionados = [];
+            for(let i=1; i<=cantidad; i++) {
+                let val = document.getElementById(`${torneo}_pos${i}`).value;
+                if(val) seleccionados.push(val);
+            }
+            
+            for(let i=1; i<=cantidad; i++) {
+                let select = document.getElementById(`${torneo}_pos${i}`);
+                let currentVal = select.value;
+                Array.from(select.options).forEach(opt => {
+                    if(opt.value !== "" && opt.value !== currentVal && seleccionados.includes(opt.value)) {
+                        opt.disabled = true;
+                    } else {
+                        opt.disabled = false;
+                    }
+                });
+            }
+        }
+
+        function enviarDatos() {
+            if(jugadoresPresentes.length === 0) {
+                alert("Primero tenés que tildar quiénes jugaron.");
+                return;
+            }
+
+            const btn = document.getElementById('btnLiquidar');
+            btn.innerText = "⏳ PROCESANDO...";
+            btn.disabled = true;
+            
+            const data = { 
+                mes: document.getElementById('mesFecha').value,
+                nroFecha: document.getElementById('nroFecha').value,
+                tipoTorneo: document.getElementById('tipoTorneo').value,
+                cantidadPresentes: jugadoresPresentes.length,
+                buyIn: document.getElementById('valorBuyIn').value,
+                gastos: [], 
+                torneo1: {}, 
+                torneo2: {} 
+            };
+
+            for(let i=1; i<=gastoCount; i++) {
+                const row = document.getElementById(`gasto${i}`);
+                if(row) {
+                    const pagador = row.querySelector('.pagador').value;
+                    const monto = row.querySelector('.monto').value;
+                    const concepto = row.querySelector('.concepto').value;
+                    if(pagador && monto) data.gastos.push({ pagador, monto, concepto });
+                }
+            }
+            for(let i=1; i<=jugadoresPresentes.length; i++) {
+                data.torneo1[`pos${i}`] = document.getElementById(`t1_pos${i}`).value || "";
+                data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || "";
+            }
+
+            const formData = new FormData();
+            formData.append("token", MI_TOKEN_SECRETO);
+            formData.append("datos", JSON.stringify(data));
+
+            fetch(googleWebhookUrl, {
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: formData 
+            }).then(() => {
+                alert("🚀 ¡FECHA LIQUIDADA EN EL EXCEL!\n\nCerrá esta ventana y revisá el chat, el bot ya te mandó el resumen financiero.");
+                btn.innerText = "🚀 LIQUIDAR FECHA";
+                btn.disabled = false;
+                if(tg) { tg.close(); }
+            }).catch(error => { 
+                alert("❌ Error de conexión. Revisá que tengas internet."); 
+                btn.innerText = "🚀 LIQUIDAR FECHA";
+                btn.disabled = false;
+            });
+        }
+
+        window.onload = cargarPadron;
+    </script>
+</body>
+</html>
