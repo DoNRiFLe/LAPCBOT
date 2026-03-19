@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ranking LAPC</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
         h1 { text-align: center; color: var(--gold-accent); letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase; font-size: 28px; }
-        .subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 30px; }
+        .subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px; }
         
         .ranking-container { background-color: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #32613f; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
         .row { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -19,12 +20,26 @@
         .points { font-size: 18px; color: var(--gold-accent); font-weight: bold; text-align: right; }
         .stats { font-size: 11px; color: #aaa; text-align: right; display: block; margin-top: 3px; }
 
-        /* Medallas para el Podio */
         .rank-1 .pos { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 26px; }
         .rank-2 .pos { color: #C0C0C0; font-size: 24px; }
         .rank-3 .pos { color: #CD7F32; font-size: 22px; }
         
         .loading { text-align: center; color: var(--gold-accent); padding: 40px; font-size: 18px; }
+
+        .btn-volver {
+            display: block; 
+            text-decoration: none; 
+            background-color: #32613f; 
+            border: 1px dashed var(--gold-accent); 
+            border-radius: 8px; 
+            padding: 12px; 
+            margin-bottom: 20px; 
+            color: white; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+            text-align: center; 
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -35,13 +50,15 @@
         <div class="loading">⏳ Calculando posiciones...</div>
     </div>
 
-    <script>
-       // 🛡️ OFUSCACIÓN TÁCTICA PERFECTA (Sin error humano)
-        const reversedUrl = "cexe/dAZkJBDpodLhfEu4WeLyjZ92tP0iIF_UtU_3lyQmHSwfRG4MgPrBThlcAgLyJJfxazbcyfKA/s/sorcam/moc.elgoog.tpircs//:sptth";
-        const reversedToken = "TERCES_ORP_6202_CPAL";
+    <a href="index.html" class="btn-volver">🔙 VOLVER AL PAÑO</a>
 
-        const googleWebhookUrl = reversedUrl.split('').reverse().join('');
-        const MI_TOKEN_SECRETO = reversedToken.split('').reverse().join('');
+    <script>
+        // Le avisamos a Telegram que esta pantalla es nuestra
+        try { window.Telegram.WebApp.expand(); } catch(e) {}
+
+        // 🚨 A CARA DESCUBIERTA: TU LINK REAL Y EXACTO 🚨
+        const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbzaxfJJyLgAchlTBPrgM4GRfwSHmQyl3_UtU_FIi0Pt29ZjyLeW4uEfhLdopDBJkZAd/exec"; 
+        const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
         const anioActual = new Date().getFullYear();
         document.getElementById('anioTitulo').innerText = "Temporada " + anioActual;
@@ -49,18 +66,26 @@
         async function cargarRanking() {
             try {
                 let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
-                let data = await response.json();
+                let rawText = await response.text();
+                
+                let data;
+                try {
+                    data = JSON.parse(rawText);
+                } catch (parseError) {
+                    document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Error de permisos. Google bloqueó la lectura.</div>`;
+                    return;
+                }
                 
                 const box = document.getElementById('rankingBox');
                 box.innerHTML = '';
 
                 if (data.error) {
-                    box.innerHTML = `<div class="loading" style="color:#ff4444;">❌ Error leyendo la base de datos.</div>`;
+                    box.innerHTML = `<div class="loading" style="color:#ff4444;">❌ ${data.error}</div>`;
                     return;
                 }
 
                 if (!data.ranking || data.ranking.length === 0) {
-                    box.innerHTML = `<div class="loading" style="color:#aaa;">No hay torneos registrados este año.</div>`;
+                    box.innerHTML = `<div class="loading" style="color:#aaa;">No hay torneos registrados en ${anioActual}. Liquidá una fecha para inaugurar la tabla.</div>`;
                     return;
                 }
 
@@ -77,14 +102,14 @@
                             <div class="name">${jug.jugador}</div>
                             <div>
                                 <div class="points">${jug.puntos.toLocaleString('es-AR')} pts</div>
-                                <div class="stats">${jug.torneos} Torneos jugados</div>
+                                <div class="stats">${jug.torneos} torneos jugados</div>
                             </div>
                         </div>`;
                     puesto++;
                 });
 
             } catch (error) {
-                document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Falla de conexión.</div>`;
+                document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Falla de red: ${error.message}</div>`;
             }
         }
 
