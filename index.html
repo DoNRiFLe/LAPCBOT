@@ -6,13 +6,17 @@
     <title>Paño LAPC</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; --input-bg: #2d2d2d; }
+        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; --input-bg: #2d2d2d; --jack-accent: #3a7bd5; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 15px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
-        h2 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; }
+        h2 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; margin-bottom: 5px; }
+        .crown-rank { text-align: center; font-size: 13px; color: var(--gold-accent); margin-bottom: 20px; text-transform: uppercase; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
         .section-card { background-color: var(--card-bg); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #32613f; }
+        .section-jack { border-color: var(--jack-accent); background-color: #1e2a3a; }
         h3 { border-bottom: 1px solid var(--gold-accent); padding-bottom: 8px; color: var(--gold-accent); margin-top: 0;}
+        .section-jack h3 { color: var(--jack-accent); border-color: var(--jack-accent); }
         label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; color: #e0e0e0; }
-        select, input { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background-color: var(--input-bg); color: white; box-sizing: border-box; }
+        select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background-color: var(--input-bg); color: white; box-sizing: border-box; font-family: inherit; }
+        textarea { resize: vertical; min-height: 60px; }
         .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .checkbox-item { background: #111; padding: 8px 12px; border-radius: 20px; border: 1px solid #444; font-size: 14px; display: flex; align-items: center; gap: 5px; }
         .checkbox-item input { width: auto; margin: 0; }
@@ -23,6 +27,7 @@
 </head>
 <body>
     <h2>♠️ LAPC ♣️</h2> 
+    <div class="crown-rank">👑 Ranking Histórico: Luis (5) - Rifle (4) 👑</div>
 
     <div class="section-card">
         <h3>📍 Check-in de Jugadores</h3>
@@ -41,6 +46,24 @@
             <option value="Slam">Slam (Puntos 100%)</option>
             <option value="GrandSlam">Grand Slam (Puntos 150%)</option>
         </select>
+    </div>
+
+    <div class="section-card section-jack">
+        <h3>🎙️ Memorias de Jack Rivers</h3>
+        <label>🏠 Sede / Lugar</label>
+        <input type="text" id="jackLugar" placeholder="Ej: Michero House, Casa de Marley...">
+        
+        <label>🥩 El Menú (Asador y Salsas)</label>
+        <textarea id="jackComida" placeholder="Ej: Bondiola de Nico con cebollas encurtidas..."></textarea>
+        
+        <label>🍻 Hidratación (Bebidas)</label>
+        <input type="text" id="jackBebida" placeholder="Ej: IPA helada, Fernet negro, Whisky..."></textarea>
+
+        <label>🃏 Manos Increíbles (Cartas y protagonistas)</label>
+        <textarea id="jackManos" placeholder="Ej: Daro color al As sepulta a Sólido..."></textarea>
+
+        <label>🔥 El Bardo / Momentos (Lo insólito de la fecha)</label>
+        <textarea id="jackBardo" placeholder="Ej: Salidas a comprar puchos, el Fichazo Gate, beodos elegantes..."></textarea>
     </div>
     
     <div class="section-card">
@@ -65,7 +88,7 @@
         <div id="torneo2"></div>
     </div>
 
-    <button id="btnLiquidar" onclick="enviarDatos()">🚀 LIQUIDAR FECHA</button>
+    <button id="btnLiquidar" onclick="enviarDatos()">🚀 LIQUIDAR Y GENERAR CRÓNICA</button>
 
     <script>
         let tg;
@@ -226,6 +249,14 @@
                 tipoTorneo: document.getElementById('tipoTorneo').value,
                 cantidadPresentes: jugadoresPresentes.length,
                 buyIn: document.getElementById('valorBuyIn').value,
+                // DATOS EXCLUSIVOS PARA JACK RIVERS
+                cronicaJack: {
+                    lugar: document.getElementById('jackLugar').value,
+                    comida: document.getElementById('jackComida').value,
+                    bebida: document.getElementById('jackBebida').value,
+                    manos: document.getElementById('jackManos').value,
+                    bardo: document.getElementById('jackBardo').value
+                },
                 gastos: [], torneo1: {}, torneo2: {} 
             };
 
@@ -249,13 +280,13 @@
 
             fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
             .then(() => {
-                alert("🚀 ¡FECHA LIQUIDADA EN EL EXCEL!\n\nRevisá tu chat privado, el bot ya te mandó la matriz de pagos.");
-                btn.innerText = "🚀 LIQUIDAR FECHA";
+                alert("🚀 ¡FECHA LIQUIDADA EN EL EXCEL!\n\nRevisá tu chat privado, Jack Rivers ya tiene la data para prender fuego todo.");
+                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA";
                 btn.disabled = false;
                 if(tg) { tg.close(); }
             }).catch(error => { 
                 alert("❌ Error de conexión. Revisá que tengas internet."); 
-                btn.innerText = "🚀 LIQUIDAR FECHA";
+                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA";
                 btn.disabled = false;
             });
         }
