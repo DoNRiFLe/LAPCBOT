@@ -117,12 +117,20 @@
         try { 
             tg = window.Telegram.WebApp; 
             tg.expand(); 
-            const idPermitido = 1149173434; 
-            const usuarioActual = tg.initDataUnsafe?.user?.id;
-            if (usuarioActual && usuarioActual !== idPermitido) {
-                document.body.innerHTML = `<div style="text-align: center; margin-top: 50px;"><h1 style="color: #ff4444; font-size: 50px;">⛔</h1><h2 style="color: #ff4444;">ACCESO DENEGADO</h2></div>`;
-                setTimeout(() => { tg.close(); }, 3000);
-                throw new Error("Intruso detectado");
+            // 🛡️ PATOVICA DIGITAL: LISTA VIP (Darío, Nico, Luigi...)
+        const idsPermitidos = [1149173434, 7721937940]; 
+        const usuarioActual = tg.initDataUnsafe?.user?.id;
+
+        if (usuarioActual && !idsPermitidos.includes(usuarioActual)) {
+            document.body.innerHTML = `
+                <div style="text-align: center; margin-top: 50px;">
+                    <h1 style="color: #ff4444; font-size: 50px;">⛔</h1>
+                    <h2 style="color: #ff4444;">ACCESO DENEGADO</h2>
+                    <p style="color: #ccc;">No tenés autorización para ver este paño.</p>
+                </div>`;
+            setTimeout(() => { tg.close(); }, 3000);
+            throw new Error("Intruso detectado");
+        }
             }
         } catch(e) { console.log("Modo navegador o error de seguridad."); }
 
