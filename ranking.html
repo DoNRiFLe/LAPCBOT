@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking LAPC</title>
+    <style>
+        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
+        h1 { text-align: center; color: var(--gold-accent); letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase; font-size: 28px; }
+        .subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 30px; }
+        
+        .ranking-container { background-color: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #32613f; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
+        .row { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .row:last-child { border-bottom: none; }
+        
+        .pos { width: 40px; font-size: 20px; font-weight: bold; color: #888; text-align: center; }
+        .name { flex-grow: 1; font-size: 18px; font-weight: bold; padding-left: 10px; }
+        .points { font-size: 18px; color: var(--gold-accent); font-weight: bold; text-align: right; }
+        .stats { font-size: 11px; color: #aaa; text-align: right; display: block; margin-top: 3px; }
+
+        /* Medallas para el Podio */
+        .rank-1 .pos { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 26px; }
+        .rank-2 .pos { color: #C0C0C0; font-size: 24px; }
+        .rank-3 .pos { color: #CD7F32; font-size: 22px; }
+        
+        .loading { text-align: center; color: var(--gold-accent); padding: 40px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <h1>👑 LEADERBOARD LAPC 👑</h1>
+    <div class="subtitle" id="anioTitulo">Temporada Oficial</div>
+
+    <div class="ranking-container" id="rankingBox">
+        <div class="loading">⏳ Calculando posiciones...</div>
+    </div>
+
+    <script>
+        // 🛡️ OFUSCACIÓN TÁCTICA
+        const reversedUrl = "cexe/dAZkJBDpodLhfEu4WeLyjZ92tP0iIF_UtU_3lyQmHSwfRG4MgPrBThlcAgLyJJfxazbcyfkA/s/sorcam/moc.elgoog.tpircs//:sptth";
+        const reversedToken = "TERCES_ORP_6202_CPAL";
+
+        const googleWebhookUrl = reversedUrl.split('').reverse().join('');
+        const MI_TOKEN_SECRETO = reversedToken.split('').reverse().join('');
+        
+        const anioActual = new Date().getFullYear();
+        document.getElementById('anioTitulo').innerText = "Temporada " + anioActual;
+
+        async function cargarRanking() {
+            try {
+                let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
+                let data = await response.json();
+                
+                const box = document.getElementById('rankingBox');
+                box.innerHTML = '';
+
+                if (data.error) {
+                    box.innerHTML = `<div class="loading" style="color:#ff4444;">❌ Error leyendo la base de datos.</div>`;
+                    return;
+                }
+
+                if (!data.ranking || data.ranking.length === 0) {
+                    box.innerHTML = `<div class="loading" style="color:#aaa;">No hay torneos registrados este año.</div>`;
+                    return;
+                }
+
+                let puesto = 1;
+                const medallas = ["🥇", "🥈", "🥉"];
+
+                data.ranking.forEach(jug => {
+                    let icono = puesto <= 3 ? medallas[puesto-1] : puesto + "º";
+                    let clasePodio = puesto <= 3 ? `rank-${puesto}` : "";
+                    
+                    box.innerHTML += `
+                        <div class="row ${clasePodio}">
+                            <div class="pos">${icono}</div>
+                            <div class="name">${jug.jugador}</div>
+                            <div>
+                                <div class="points">${jug.puntos.toLocaleString('es-AR')} pts</div>
+                                <div class="stats">${jug.torneos} manos jugadas</div>
+                            </div>
+                        </div>`;
+                    puesto++;
+                });
+
+            } catch (error) {
+                document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Falla de conexión.</div>`;
+            }
+        }
+
+        window.onload = cargarRanking;
+    </script>
+</body>
+</html>
