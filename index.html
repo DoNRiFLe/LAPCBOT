@@ -25,12 +25,12 @@
     <h2>♠️ LAPC ♣️</h2> 
 
     <div class="section-card">
-        <h3>📍 1. Check-in de Jugadores</h3>
+        <h3>📍 Check-in de Jugadores</h3>
         <div class="checkbox-group" id="checkinArea">⏳ Conectando con el Padrón...</div>
     </div>
     
     <div class="section-card">
-        <h3>📅 0. Datos de la Jornada</h3>
+        <h3>📅 Datos de la Jornada</h3>
         <label>Mes de la Fecha</label>
         <select id="mesFecha">
             <option value="">⏳ Evaluando fechas disponibles...</option>
@@ -50,18 +50,18 @@
     </div>
 
     <div class="section-card">
-        <h3>💸 2. La Caja (Gastos)</h3>
+        <h3>💸 La Caja (Gastos)</h3>
         <div id="gastosContainer"></div>
         <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
     </div>
 
     <div class="section-card">
-        <h3>🏆 3. Torneo 1</h3>
+        <h3>🏆 Torneo 1</h3>
         <div id="torneo1"></div>
     </div>
 
     <div class="section-card">
-        <h3>🏆 4. Torneo 2</h3>
+        <h3>🏆 Torneo 2</h3>
         <div id="torneo2"></div>
     </div>
 
@@ -81,18 +81,16 @@
             }
         } catch(e) { console.log("Modo navegador o error de seguridad."); }
 
-        // 🛡️ OFUSCACIÓN TÁCTICA ACTIVA
-        const reversedUrl = "cexe/Iqbn6X1iqMMfRMA9uN2-HGjHxKTZ1BFhCxXbMgJ2w28nGO3YXhKdJn_IUGdeudcbxbcYfKA/s/sorcam/moc.elgoog.tpircs//:sptth";
-        const reversedToken = "TERCES_ORP_6202_CPAL";
-
-        const googleWebhookUrl = reversedUrl.split('').reverse().join('');
-        const MI_TOKEN_SECRETO = reversedToken.split('').reverse().join('');
+        // 🚨 MODO A CARA DESCUBIERTA: PEGAR LINK ACÁ ADENTRO DE LAS COMILLAS 🚨
+        const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbxbcduedGUI_nJdKhXY3OGn82w2JgmGbXxChFB1ZTKxHjGH-2Nu9AMRfMMqi1X6nbqI/exec"; 
+        
+        const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
         let todosLosJugadores = [];
         let jugadoresPresentes = [];
         let gastoCount = 0;
         let historialFechas = []; 
-        const anioActual = new Date().getFullYear(); // Motor de año automático
+        const anioActual = new Date().getFullYear(); 
 
         async function cargarPadron() {
             try {
@@ -108,22 +106,21 @@
                 todosLosJugadores = data.jugadores || [];
                 historialFechas = data.fechasJugadas || []; 
                 renderizarCheckboxes();
-                renderizarMesesPredictivos(); // 🧠 ACTIVAMOS LA IA DEL CALENDARIO
+                renderizarMesesPredictivos(); 
             } catch (error) {
                 document.getElementById('checkinArea').innerHTML = "❌ Error conectando con la base financiera.";
             }
         }
 
-        // 🧠 FUNCIÓN PREDICTIVA: Solo muestra lo que no se jugó
         function renderizarMesesPredictivos() {
             const selectMes = document.getElementById('mesFecha');
             selectMes.innerHTML = '';
             const todosLosMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
             const mesesDisponibles = todosLosMeses.filter(mes => {
-                const idBuscado = mes + "-" + anioActual; // Busca "Enero-2026"
-                const idPruebaVieja = mes + "-1";         // Filtra tus pruebas viejas de "Enero-1"
-                const idPruebaVieja2 = mes + "-2";        // Filtra "Febrero-2"
+                const idBuscado = mes + "-" + anioActual; 
+                const idPruebaVieja = mes + "-1";         
+                const idPruebaVieja2 = mes + "-2";        
                 return !historialFechas.includes(idBuscado) && !historialFechas.includes(idPruebaVieja) && !historialFechas.includes(idPruebaVieja2);
             });
 
@@ -213,7 +210,6 @@
                 return;
             }
 
-            // Doble chequeo de seguridad por si acaso
             const idActual = mesIngresado + "-" + anioActual;
             if (historialFechas.includes(idActual)) {
                 alert(`⚠️ ALTO AHÍ: El torneo de "${mesIngresado} ${anioActual}" ya está liquidado.`);
@@ -226,7 +222,7 @@
             
             const data = { 
                 mes: mesIngresado,
-                nroFecha: anioActual, // 💉 INYECCIÓN DEL AÑO AL EXCEL
+                nroFecha: anioActual, 
                 tipoTorneo: document.getElementById('tipoTorneo').value,
                 cantidadPresentes: jugadoresPresentes.length,
                 buyIn: document.getElementById('valorBuyIn').value,
