@@ -7,10 +7,12 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; --input-bg: #2d2d2d; --jack-accent: #3a7bd5; }
-        
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 15px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
         h2 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; margin-bottom: 5px; }
-        .crown-rank { text-align: center; font-size: 13px; color: var(--gold-accent); margin-bottom: 20px; text-transform: uppercase; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        
+        .btn-ranking-link { display: block; text-decoration: none; background: linear-gradient(90deg, #111, #224a2e, #111); border: 1px solid var(--gold-accent); border-radius: 8px; padding: 12px; margin-bottom: 20px; color: var(--gold-accent); text-transform: uppercase; font-weight: bold; text-align: center; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.2s ease; }
+        .btn-ranking-link:active { transform: scale(0.98); background: var(--gold-accent); color: #111; }
+
         .section-card { background-color: var(--card-bg); border-radius: 10px; padding: 15px; margin-bottom: 20px; border: 1px solid #32613f; }
         .section-jack { border-color: var(--jack-accent); background-color: #1e2a3a; }
         h3 { border-bottom: 1px solid var(--gold-accent); padding-bottom: 8px; color: var(--gold-accent); margin-top: 0;}
@@ -18,74 +20,45 @@
         label { font-weight: bold; display: block; margin-top: 10px; font-size: 14px; color: #e0e0e0; }
         select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background-color: var(--input-bg); color: white; box-sizing: border-box; font-family: inherit; }
         textarea { resize: vertical; min-height: 60px; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .checkbox-item { background: #111; padding: 8px 12px; border-radius: 20px; border: 1px solid #444; font-size: 14px; display: flex; align-items: center; gap: 5px; }
-        .checkbox-item input { width: auto; margin: 0; }
-        button { width: 100%; padding: 15px; margin-top: 10px; background-color: var(--gold-accent); color: #111; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .btn-gasto { background-color: #32613f; color: white; margin-bottom: 15px; border: 1px dashed var(--gold-accent); }
+        
+        /* CSS MATRIZ TÁCTICA */
+        .player-row { background: #111; padding: 10px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: bold; color: var(--gold-accent); cursor: pointer; }
+        .checkbox-item input { width: 18px; height: 18px; margin: 0; }
+        .matrix-toggles { display: flex; gap: 5px; margin-top: 10px; flex-wrap: wrap; }
+        .toggle-btn { flex: 1; padding: 6px 2px; border-radius: 4px; border: 1px solid #555; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #333; color: #888; transition: all 0.2s; margin-top: 0; }
+        .toggle-btn.active { background-color: var(--gold-accent); color: #111; border-color: var(--gold-accent); }
+
+        button.btn-main { width: 100%; padding: 15px; margin-top: 10px; background-color: var(--gold-accent); color: #111; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .btn-gasto { background-color: #32613f; color: white; margin-bottom: 15px; border: 1px dashed var(--gold-accent); width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; }
         .gasto-row { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
-        .btn-ranking-link { 
-            display: block; 
-            text-decoration: none; 
-            background: linear-gradient(90deg, #111, #224a2e, #111); 
-            border: 1px solid var(--gold-accent); 
-            border-radius: 8px; 
-            padding: 12px; 
-            margin-bottom: 20px; 
-            color: var(--gold-accent); 
-            text-transform: uppercase; 
-            font-weight: bold; 
-            text-align: center; 
-            letter-spacing: 1px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-            transition: all 0.2s ease; 
-        }
-        .btn-ranking-link:active { 
-            transform: scale(0.98); 
-            background: var(--gold-accent); 
-            color: #111; 
-        }
     </style>
 </head>
 <body>
     <h2>♠️ LAPC ♣️</h2> 
-    <a href="ranking.html" class="btn-ranking-link">         👑 VER LEADERBOARD OFICIAL 👑    </a>
+    
+    <a href="ranking.html" class="btn-ranking-link">👑 VER LEADERBOARD OFICIAL 👑</a>
 
     <div class="section-card">
-        <h3>📍 Check-in de Jugadores</h3>
-        <div class="checkbox-group" id="checkinArea">⏳ Conectando con el Padrón...</div>
+        <h3>📍 Matriz de Asistencia y Consumos</h3>
+        <div id="checkinArea">⏳ Conectando con el Padrón...</div>
     </div>
     
     <div class="section-card">
         <h3>📅 Datos de la Jornada</h3>
         <label>Mes de la Fecha</label>
-        <select id="mesFecha">
-            <option value="">⏳ Evaluando fechas disponibles...</option>
-        </select>
-        
+        <select id="mesFecha"><option value="">⏳ Evaluando fechas disponibles...</option></select>
         <label>Tipo de Torneo</label>
-        <select id="tipoTorneo">
-            <option value="Slam">Slam (Puntos 100%)</option>
-            <option value="GrandSlam">Grand Slam (Puntos 150%)</option>
-        </select>
+        <select id="tipoTorneo"><option value="Slam">Slam (Puntos 100%)</option><option value="GrandSlam">Grand Slam (Puntos 150%)</option></select>
     </div>
 
     <div class="section-card section-jack">
         <h3>🎙️ Memorias de Jack Rivers</h3>
-        <label>🏠 Sede / Lugar</label>
-        <input type="text" id="jackLugar" placeholder="Ej: Rifle House, Casa de Marley...">
-        
-        <label>🥩 El Menú (Asador y Salsas)</label>
-        <textarea id="jackComida" placeholder="Ej: Bondiola de Nico con cebollas encurtidas..."></textarea>
-        
-        <label>🍻 Hidratación (Bebidas)</label>
-        <input type="text" id="jackBebida" placeholder="Ej: IPA helada, Fernet negro, Whisky..."></textarea>
-
-        <label>🃏 Manos Increíbles (Cartas y protagonistas)</label>
-        <textarea id="jackManos" placeholder="Ej: Daro color al As sepulta a Sólido..."></textarea>
-
-        <label>🔥 El Bardo / Momentos (Lo insólito de la fecha)</label>
-        <textarea id="jackBardo" placeholder="Ej: Salidas a comprar puchos, el Fichazo Gate, beodos elegantes..."></textarea>
+        <label>🏠 Sede / Lugar</label><input type="text" id="jackLugar" placeholder="Ej: Rifle House, Casa de Marley...">
+        <label>🥩 El Menú</label><textarea id="jackComida" placeholder="Ej: Bondiola de Nico con cebollas..."></textarea>
+        <label>🍻 Hidratación</label><input type="text" id="jackBebida" placeholder="Ej: IPA helada, Fernet negro...">
+        <label>🃏 Manos Increíbles</label><textarea id="jackManos" placeholder="Ej: Daro color al As sepulta a Sólido..."></textarea>
+        <label>🔥 El Bardo</label><textarea id="jackBardo" placeholder="Ej: Salidas a comprar puchos..."></textarea>
     </div>
     
     <div class="section-card">
@@ -110,36 +83,28 @@
         <div id="torneo2"></div>
     </div>
 
-    <button id="btnLiquidar" onclick="enviarDatos()">🚀 LIQUIDAR Y GENERAR CRÓNICA</button>
+    <button id="btnLiquidar" class="btn-main" onclick="enviarDatos()">🚀 LIQUIDAR Y GENERAR CRÓNICA</button>
 
     <script>
-       let tg;
+        let tg;
         try { 
             tg = window.Telegram.WebApp; 
             tg.expand(); 
-            // 🛡️ PATOVICA DIGITAL: LISTA VIP (Darío, Nico, Tavo...)
-            const idsPermitidos = [1149173434, 7721937940, 1524703964]; 
+            const idsPermitidos = [1149173434, 7721937940]; 
             const usuarioActual = tg.initDataUnsafe?.user?.id;
-
+            
             if (usuarioActual && !idsPermitidos.includes(usuarioActual)) {
-                document.body.innerHTML = `
-                    <div style="text-align: center; margin-top: 50px;">
-                        <h1 style="color: #ff4444; font-size: 50px;">⛔</h1>
-                        <h2 style="color: #ff4444;">ACCESO DENEGADO</h2>
-                        <p style="color: #ccc;">No tenés autorización para ver este paño.</p>
-                    </div>`;
+                document.body.innerHTML = `<div style="text-align: center; margin-top: 50px;"><h1 style="color: #ff4444; font-size: 50px;">⛔</h1><h2 style="color: #ff4444;">ACCESO DENEGADO</h2></div>`;
                 setTimeout(() => { tg.close(); }, 3000);
                 throw new Error("Intruso detectado");
             }
-        } catch(e) { console.log("Modo navegador o error de seguridad."); }
-        
-        // 🚨 MODO A CARA DESCUBIERTA: PEGAR LINK ACÁ ADENTRO DE LAS COMILLAS 🚨
+        } catch(e) {}
+
         const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbzaxfJJyLgAchlTBPrgM4GRfwSHmQyl3_UtU_FIi0Pt29ZjyLeW4uEfhLdopDBJkZAd/exec"; 
-        
         const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
+        let matrizJugadores = {}; // EL NUEVO CEREBRO DE ESTADOS
         let todosLosJugadores = [];
-        let jugadoresPresentes = [];
         let gastoCount = 0;
         let historialFechas = []; 
         const anioActual = new Date().getFullYear(); 
@@ -151,13 +116,12 @@
                 
                 if (data.error) {
                     document.getElementById('checkinArea').innerHTML = `❌ ${data.error}`;
-                    document.getElementById('mesFecha').innerHTML = `<option value="">❌ Error</option>`;
                     return;
                 }
                 
                 todosLosJugadores = data.jugadores || [];
                 historialFechas = data.fechasJugadas || []; 
-                renderizarCheckboxes();
+                renderizarMatriz();
                 renderizarMesesPredictivos(); 
             } catch (error) {
                 document.getElementById('checkinArea').innerHTML = "❌ Error conectando con la base financiera.";
@@ -168,122 +132,155 @@
             const selectMes = document.getElementById('mesFecha');
             selectMes.innerHTML = '';
             const todosLosMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
             const mesesDisponibles = todosLosMeses.filter(mes => {
                 const idBuscado = mes + "-" + anioActual; 
-                const idPruebaVieja = mes + "-1";         
-                const idPruebaVieja2 = mes + "-2";        
-                return !historialFechas.includes(idBuscado) && !historialFechas.includes(idPruebaVieja) && !historialFechas.includes(idPruebaVieja2);
+                return !historialFechas.includes(idBuscado) && !historialFechas.includes(mes+"-1") && !historialFechas.includes(mes+"-2");
             });
 
             if (mesesDisponibles.length === 0) {
                 selectMes.innerHTML = '<option value="">🏆 TEMPORADA COMPLETADA</option>';
-                const btn = document.getElementById('btnLiquidar');
-                btn.disabled = true;
-                btn.innerText = "⛔ AÑO CERRADO";
-                btn.style.backgroundColor = "#555";
+                document.getElementById('btnLiquidar').disabled = true;
+                document.getElementById('btnLiquidar').innerText = "⛔ AÑO CERRADO";
+                document.getElementById('btnLiquidar').style.backgroundColor = "#555";
             } else {
-                mesesDisponibles.forEach(mes => {
-                    selectMes.innerHTML += `<option value="${mes}">${mes}</option>`;
-                });
+                mesesDisponibles.forEach(mes => { selectMes.innerHTML += `<option value="${mes}">${mes}</option>`; });
             }
         }
 
-        function renderizarCheckboxes() {
-            const checkinArea = document.getElementById('checkinArea');
-            checkinArea.innerHTML = '';
+        // MOTOR DE LA MATRIZ VISUAL
+        function renderizarMatriz() {
+            const area = document.getElementById('checkinArea');
+            area.innerHTML = '';
             todosLosJugadores.forEach(j => {
-                checkinArea.innerHTML += `<label class="checkbox-item"><input type="checkbox" value="${j}" onchange="actualizarPresentes()"> ${j}</label>`;
+                matrizJugadores[j] = { presente: false, t1: true, t2: true, comida: true, bebida: true };
+                let safeId = j.replace(/\\s+/g, '_');
+                
+                area.innerHTML += `
+                    <div class="player-row">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="chk_${safeId}" onchange="togglePresente('${j}', '${safeId}')"> ${j}
+                        </label>
+                        <div class="matrix-toggles" id="toggles_${safeId}" style="display:none;">
+                            <button type="button" class="toggle-btn active" id="btn_t1_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 't1')">🏆 T1</button>
+                            <button type="button" class="toggle-btn active" id="btn_t2_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 't2')">🏆 T2</button>
+                            <button type="button" class="toggle-btn active" id="btn_comida_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 'comida')">🥩 Comida</button>
+                            <button type="button" class="toggle-btn active" id="btn_bebida_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 'bebida')">🍻 Bebida</button>
+                        </div>
+                    </div>
+                `;
             });
         }
 
-        function actualizarPresentes() {
-            const checkboxes = document.querySelectorAll('#checkinArea input:checked');
-            jugadoresPresentes = Array.from(checkboxes).map(cb => cb.value);
+        function togglePresente(nombre, safeId) {
+            const isChecked = document.getElementById(`chk_${safeId}`).checked;
+            matrizJugadores[nombre].presente = isChecked;
+            document.getElementById(`toggles_${safeId}`).style.display = isChecked ? 'flex' : 'none';
+            actualizarEcosistema();
+        }
+
+        function toggleOpcion(nombre, safeId, opcion) {
+            matrizJugadores[nombre][opcion] = !matrizJugadores[nombre][opcion];
+            const btn = document.getElementById(`btn_${opcion}_${safeId}`);
+            if (matrizJugadores[nombre][opcion]) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+            actualizarEcosistema();
+        }
+
+        function actualizarEcosistema() {
             document.getElementById('gastosContainer').innerHTML = '';
             gastoCount = 0;
-            if (jugadoresPresentes.length > 0) { agregarGasto(); }
+            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
+            if (presentes.length > 0) { agregarGasto(); }
             poblarTorneos();
         }
 
         function agregarGasto() {
             gastoCount++;
+            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
             let options = '<option value="">Seleccionar...</option>';
-            jugadoresPresentes.forEach(j => options += `<option value="${j}">${j}</option>`);
+            presentes.forEach(j => options += `<option value="${j}">${j}</option>`);
+            
             const html = `
                 <div class="gasto-row" id="gasto${gastoCount}">
                     <label>¿Quién pagó?</label><select class="pagador">${options}</select>
                     <label>Monto ($)</label><input type="number" class="monto" placeholder="Ej: 15000">
-                    <label>Concepto</label>
-                    <select class="concepto"><option value="Asado">🥩 Asado</option><option value="Bebida">🍻 Bebida</option><option value="Hielo">🧊 Hielo</option><option value="Varios">📦 Varios</option></select>
+                    <label>Concepto (División)</label>
+                    <select class="concepto">
+                        <option value="Comida">🥩 Comida (Solo los que comieron)</option>
+                        <option value="Bebida">🍻 Bebida (Solo los que bebieron)</option>
+                        <option value="Varios">📦 Varios (Entre TODOS los presentes)</option>
+                    </select>
                 </div>`;
             document.getElementById('gastosContainer').insertAdjacentHTML('beforeend', html);
         }
 
         function poblarTorneos() {
             const medallas = ["🥇 1º", "🥈 2º", "🥉 3º", "🏅 4º", "💀 5º", "💀 6º", "💀 7º", "💀 8º", "💀 9º", "💀 10º"];
-            let options = '<option value="">Seleccionar...</option>';
-            jugadoresPresentes.forEach(j => options += `<option value="${j}">${j}</option>`);
-            document.getElementById('torneo1').innerHTML = '';
-            document.getElementById('torneo2').innerHTML = '';
-            let cantidad = jugadoresPresentes.length;
-            for(let i=1; i<=cantidad; i++) {
-                let medalla = medallas[i-1] || `💀 ${i}º`;
-                document.getElementById('torneo1').innerHTML += `<label>${medalla} Puesto</label><select id="t1_pos${i}" onchange="validarUnicos('t1', ${cantidad})">${options}</select>`;
-                document.getElementById('torneo2').innerHTML += `<label>${medalla} Puesto</label><select id="t2_pos${i}" onchange="validarUnicos('t2', ${cantidad})">${options}</select>`;
+            
+            // Filtramos exacto quién juega qué
+            const jugT1 = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente && matrizJugadores[j].t1);
+            const jugT2 = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente && matrizJugadores[j].t2);
+
+            let optT1 = '<option value="">Seleccionar...</option>';
+            jugT1.forEach(j => optT1 += `<option value="${j}">${j}</option>`);
+
+            let optT2 = '<option value="">Seleccionar...</option>';
+            jugT2.forEach(j => optT2 += `<option value="${j}">${j}</option>`);
+
+            document.getElementById('torneo1').innerHTML = `<div style="font-size:12px; color:#aaa; margin-bottom:10px;">Jugadores en T1: ${jugT1.length}</div>`;
+            document.getElementById('torneo2').innerHTML = `<div style="font-size:12px; color:#aaa; margin-bottom:10px;">Jugadores en T2: ${jugT2.length}</div>`;
+
+            for(let i=1; i<=jugT1.length; i++) {
+                let m = medallas[i-1] || `💀 ${i}º`;
+                document.getElementById('torneo1').innerHTML += `<label>${m} Puesto</label><select id="t1_pos${i}" onchange="validarUnicos('t1', ${jugT1.length})">${optT1}</select>`;
+            }
+            for(let i=1; i<=jugT2.length; i++) {
+                let m = medallas[i-1] || `💀 ${i}º`;
+                document.getElementById('torneo2').innerHTML += `<label>${m} Puesto</label><select id="t2_pos${i}" onchange="validarUnicos('t2', ${jugT2.length})">${optT2}</select>`;
             }
         }
 
         function validarUnicos(torneo, cantidad) {
             let seleccionados = [];
             for(let i=1; i<=cantidad; i++) {
-                let val = document.getElementById(`${torneo}_pos${i}`).value;
+                let val = document.getElementById(`${torneo}_pos${i}`)?.value;
                 if(val) seleccionados.push(val);
             }
             for(let i=1; i<=cantidad; i++) {
                 let select = document.getElementById(`${torneo}_pos${i}`);
-                let currentVal = select.value;
-                Array.from(select.options).forEach(opt => {
-                    if(opt.value !== "" && opt.value !== currentVal && seleccionados.includes(opt.value)) { opt.disabled = true; } 
-                    else { opt.disabled = false; }
-                });
+                if(select) {
+                    let currentVal = select.value;
+                    Array.from(select.options).forEach(opt => {
+                        opt.disabled = (opt.value !== "" && opt.value !== currentVal && seleccionados.includes(opt.value));
+                    });
+                }
             }
         }
 
         function enviarDatos() {
-            if(jugadoresPresentes.length === 0) {
-                alert("Primero tenés que tildar quiénes jugaron.");
-                return;
-            }
-
+            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
+            if(presentes.length === 0) { alert("Tildá al menos a un jugador en la Matriz."); return; }
+            
             const mesIngresado = document.getElementById('mesFecha').value;
-            if(!mesIngresado) {
-                alert("No hay un mes válido para liquidar.");
-                return;
-            }
+            if(!mesIngresado) { alert("No hay un mes válido para liquidar."); return; }
 
-            const idActual = mesIngresado + "-" + anioActual;
-            if (historialFechas.includes(idActual)) {
-                alert(`⚠️ ALTO AHÍ: El torneo de "${mesIngresado} ${anioActual}" ya está liquidado.`);
-                return; 
+            if (historialFechas.includes(mesIngresado + "-" + anioActual)) {
+                alert(`⚠️ ALTO AHÍ: El torneo de "${mesIngresado} ${anioActual}" ya está liquidado.`); return; 
             }
 
             const btn = document.getElementById('btnLiquidar');
-            btn.innerText = "⏳ PROCESANDO...";
-            btn.disabled = true;
+            btn.innerText = "⏳ PROCESANDO LA MATRIZ..."; btn.disabled = true;
             
             const data = { 
-                mes: mesIngresado,
-                nroFecha: anioActual, 
-                tipoTorneo: document.getElementById('tipoTorneo').value,
-                cantidadPresentes: jugadoresPresentes.length,
+                mes: mesIngresado, nroFecha: anioActual, tipoTorneo: document.getElementById('tipoTorneo').value,
                 buyIn: document.getElementById('valorBuyIn').value,
-                // DATOS EXCLUSIVOS PARA JACK RIVERS
+                matriz: matrizJugadores, // ENVIAMOS LA MATRIZ COMPLETA AL SERVIDOR
                 cronicaJack: {
-                    lugar: document.getElementById('jackLugar').value,
-                    comida: document.getElementById('jackComida').value,
-                    bebida: document.getElementById('jackBebida').value,
-                    manos: document.getElementById('jackManos').value,
+                    lugar: document.getElementById('jackLugar').value, comida: document.getElementById('jackComida').value,
+                    bebida: document.getElementById('jackBebida').value, manos: document.getElementById('jackManos').value,
                     bardo: document.getElementById('jackBardo').value
                 },
                 gastos: [], torneo1: {}, torneo2: {} 
@@ -292,31 +289,27 @@
             for(let i=1; i<=gastoCount; i++) {
                 const row = document.getElementById(`gasto${i}`);
                 if(row) {
-                    const pagador = row.querySelector('.pagador').value;
-                    const monto = row.querySelector('.monto').value;
-                    const concepto = row.querySelector('.concepto').value;
+                    const pagador = row.querySelector('.pagador').value, monto = row.querySelector('.monto').value, concepto = row.querySelector('.concepto').value;
                     if(pagador && monto) data.gastos.push({ pagador, monto, concepto });
                 }
             }
-            for(let i=1; i<=jugadoresPresentes.length; i++) {
-                data.torneo1[`pos${i}`] = document.getElementById(`t1_pos${i}`).value || "";
-                data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || "";
-            }
+            
+            const jugT1 = presentes.filter(j => matrizJugadores[j].t1);
+            const jugT2 = presentes.filter(j => matrizJugadores[j].t2);
+            
+            for(let i=1; i<=jugT1.length; i++) { data.torneo1[`pos${i}`] = document.getElementById(`t1_pos${i}`).value || ""; }
+            for(let i=1; i<=jugT2.length; i++) { data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || ""; }
 
             const formData = new FormData();
-            formData.append("token", MI_TOKEN_SECRETO);
-            formData.append("datos", JSON.stringify(data));
+            formData.append("token", MI_TOKEN_SECRETO); formData.append("datos", JSON.stringify(data));
 
             fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
             .then(() => {
-                alert("🚀 ¡FECHA LIQUIDADA EN EL EXCEL!\n\nRevisá tu chat privado, Jack Rivers ya tiene la data para prender fuego todo.");
-                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA";
-                btn.disabled = false;
+                alert("🚀 ¡MATRIZ PROCESADA Y LIQUIDADA!\\n\\nEsperá el telegrama en el chat.");
+                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA"; btn.disabled = false;
                 if(tg) { tg.close(); }
             }).catch(error => { 
-                alert("❌ Error de conexión. Revisá que tengas internet."); 
-                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA";
-                btn.disabled = false;
+                alert("❌ Error de red."); btn.disabled = false;
             });
         }
 
