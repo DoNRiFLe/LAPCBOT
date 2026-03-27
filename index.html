@@ -303,13 +303,19 @@
             const formData = new FormData();
             formData.append("token", MI_TOKEN_SECRETO); formData.append("datos", JSON.stringify(data));
 
-            fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
+         fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
             .then(() => {
-                alert("🚀 ¡MATRIZ PROCESADA Y LIQUIDADA!\\n\\nEsperá el telegrama en el chat.");
-                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA"; btn.disabled = false;
-                if(tg) { tg.close(); }
+                // 🚀 INNOVACIÓN VISUAL: Chau alert(), hola botón inteligente
+                btn.innerText = "✅ ¡MATRIZ LIQUIDADA!"; 
+                btn.style.backgroundColor = "#4CAF50"; // Verde éxito
+                btn.style.color = "white";
+                
+                // Cerramos la app solos después de 2.5 segundos
+                setTimeout(() => { if(tg) tg.close(); }, 2500);
             }).catch(error => { 
-                alert("❌ Error de red."); btn.disabled = false;
+                alert("❌ Error de red."); 
+                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA"; 
+                btn.disabled = false;
             });
         }
 
