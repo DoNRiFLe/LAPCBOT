@@ -32,52 +32,74 @@
         button.btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
         .btn-gasto { background-color: #32613f; color: white; margin-bottom: 15px; border: 1px dashed var(--gold-accent); width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; }
         .gasto-row { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+
+        /* ESTILOS DEL RELOJ GIGANTE */
+        #pantallaReloj { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:#050505; z-index:9999; flex-direction:column; justify-content:center; align-items:center; }
+        #relojNivel { color:var(--gold-accent); font-size:28px; margin-bottom:15px; font-weight:900; letter-spacing: 2px; text-transform: uppercase; }
+        #relojTiempo { color:white; font-size:110px; font-weight:bold; font-family:monospace; margin-bottom:40px; line-height: 1; text-shadow: 0 0 20px rgba(255,255,255,0.2); }
+        .btn-reloj { padding:20px 25px; font-size:16px; font-weight:bold; border:none; border-radius:8px; cursor: pointer; text-transform: uppercase; }
     </style>
 </head>
 <body>
-    <h2>♠️ LAPC ♣️</h2> 
-    
-    <a href="ranking.html" class="btn-ranking-link">📊 ESTADÍSTICAS (LEADER, FORT Y FECHAS)</a>
+    <div id="appPrincipal">
+        <h2>♠️ LAPC ♣️</h2> 
+        <a href="ranking.html" class="btn-ranking-link">📊 ESTADÍSTICAS (LEADER, FORT Y FECHAS)</a>
 
-    <div class="section-card">
-        <h3>📅 Datos de la Jornada</h3>
-        <label>Mes de la Fecha</label>
-        <select id="mesFecha" onchange="detectarModoInteligente()"><option value="">⏳ Conectando al servidor...</option></select>
+        <button class="btn-main" style="background-color: #e63946; color: white; margin-bottom: 20px;" onclick="abrirReloj()">⏱️ ABRIR RELOJ LAPC</button>
+
+        <div class="section-card">
+            <h3>📅 Datos de la Jornada</h3>
+            <label>Mes de la Fecha</label>
+            <select id="mesFecha" onchange="detectarModoInteligente()"><option value="">⏳ Conectando al servidor...</option></select>
+            
+            <div id="areaFinanzas1">
+                <label>Tipo de Torneo</label>
+                <select id="tipoTorneo"><option value="Slam">Slam (Puntos 100%)</option><option value="GrandSlam">Grand Slam (Puntos 150%)</option></select>
+                <label>Valor de la Entrada (Buy-in)</label>
+                <input type="number" id="valorBuyIn" value="6000" style="font-weight: bold; color: var(--gold-accent);">
+            </div>
+        </div>
+
+        <div id="areaFinanzas2">
+            <div class="section-card">
+                <h3>📍 Matriz de Asistencia y Consumos</h3>
+                <div id="checkinArea">⏳ Cargando...</div>
+            </div>
+
+            <div class="section-card">
+                <h3>💸 La Caja (Gastos)</h3>
+                <div id="gastosContainer"></div>
+                <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
+            </div>
+
+            <div class="section-card"><h3>🏆 Torneo 1</h3><div id="torneo1"></div></div>
+            <div class="section-card"><h3>🏆 Torneo 2</h3><div id="torneo2"></div></div>
+        </div>
+
+        <div class="section-card section-jack" id="areaJack">
+            <h3>🎙️ Memorias de Jack Rivers</h3>
+            <label>🏠 Sede / Lugar</label><input type="text" id="jackLugar" placeholder="Ej: Rifle House...">
+            <label>🥩 El Menú</label><textarea id="jackComida" placeholder="Ej: Bondiola..." oninput="validarJack()"></textarea>
+            <label>🍻 Hidratación</label><input type="text" id="jackBebida" placeholder="Ej: IPA y Fernet..." oninput="validarJack()"></textarea>
+            <label>🃏 Manos Increíbles</label><textarea id="jackManos" placeholder="Ej: Daro color al As..." oninput="validarJack()"></textarea>
+            <label>🔥 El Bardo</label><textarea id="jackBardo" placeholder="Ej: Bardo con las fichas..." oninput="validarJack()"></textarea>
+        </div>
         
-        <div id="areaFinanzas1">
-            <label>Tipo de Torneo</label>
-            <select id="tipoTorneo"><option value="Slam">Slam (Puntos 100%)</option><option value="GrandSlam">Grand Slam (Puntos 150%)</option></select>
-            <label>Valor de la Entrada (Buy-in)</label>
-            <input type="number" id="valorBuyIn" value="6000" style="font-weight: bold; color: var(--gold-accent);">
-        </div>
+        <button id="btnLiquidar" class="btn-main" onclick="enviarDatos()">🚀 LIQUIDAR CAJA (DOMINGO)</button>
     </div>
 
-    <div id="areaFinanzas2">
-        <div class="section-card">
-            <h3>📍 Matriz de Asistencia y Consumos</h3>
-            <div id="checkinArea">⏳ Cargando...</div>
+    <div id="pantallaReloj">
+        <div id="relojNivel">NIVEL 1</div>
+        <div id="relojTiempo">12:00</div>
+        
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; width:95%; max-width: 400px;">
+            <button class="btn-reloj" id="btnPlayPause" style="background-color:#4CAF50; color:white; flex: 1 1 100%;" onclick="toggleReloj()">▶️ INICIAR RELOJ</button>
+            <button class="btn-reloj" style="background-color:var(--gold-accent); color:#111; flex: 1;" onclick="siguienteNivel()">⏭️ SIG. NIVEL</button>
+            <button class="btn-reloj" id="btnHeadsUp" style="background-color:#e63946; color:white; flex: 1;" onclick="modoHeadsUp()">⚔️ HEADS UP</button>
         </div>
-
-        <div class="section-card">
-            <h3>💸 La Caja (Gastos)</h3>
-            <div id="gastosContainer"></div>
-            <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
-        </div>
-
-        <div class="section-card"><h3>🏆 Torneo 1</h3><div id="torneo1"></div></div>
-        <div class="section-card"><h3>🏆 Torneo 2</h3><div id="torneo2"></div></div>
+        
+        <button onclick="cerrarReloj()" style="margin-top:50px; padding:10px 20px; font-size:12px; background-color:#333; color:#aaa; border:1px solid #555; border-radius:8px; cursor: pointer;">🔙 VOLVER A LA CAJA</button>
     </div>
-
-    <div class="section-card section-jack" id="areaJack">
-        <h3>🎙️ Memorias de Jack Rivers</h3>
-        <label>🏠 Sede / Lugar</label><input type="text" id="jackLugar" placeholder="Ej: Rifle House...">
-        <label>🥩 El Menú</label><textarea id="jackComida" placeholder="Ej: Bondiola..." oninput="validarJack()"></textarea>
-        <label>🍻 Hidratación</label><input type="text" id="jackBebida" placeholder="Ej: IPA y Fernet..." oninput="validarJack()"></textarea>
-        <label>🃏 Manos Increíbles</label><textarea id="jackManos" placeholder="Ej: Daro color al As..." oninput="validarJack()"></textarea>
-        <label>🔥 El Bardo</label><textarea id="jackBardo" placeholder="Ej: Bardo con las fichas..." oninput="validarJack()"></textarea>
-    </div>
-    
-    <button id="btnLiquidar" class="btn-main" onclick="enviarDatos()">🚀 LIQUIDAR CAJA (DOMINGO)</button>
 
     <script>
         let tg;
@@ -97,12 +119,96 @@
         let historialFechas = []; 
         const anioActual = new Date().getFullYear(); 
 
+        // --- LÓGICA DEL RELOJ TÁCTICO ---
+        let tiempoRestante = 12 * 60; 
+        let tiempoNivel = 12 * 60;
+        let relojInterval = null;
+        let relojCorriendo = false;
+        let nivelActual = 1;
+        let esHeadsUp = false;
+
+        function calcularTiempoDinámico() {
+            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente).length;
+            if(presentes === 0) return 12; // Resguardo por si no tildaron a nadie aún
+            return 8 + (presentes * 0.5); // 8 mins base + 30 segs por mono
+        }
+
+        function abrirReloj() {
+            document.getElementById('appPrincipal').style.display = 'none';
+            document.getElementById('pantallaReloj').style.display = 'flex';
+            
+            // Auto-calcular tiempo basado en la matriz solo la primera vez que se abre
+            if(!relojCorriendo && nivelActual === 1 && !esHeadsUp) {
+                let mins = calcularTiempoDinámico();
+                tiempoNivel = Math.floor(mins * 60);
+                tiempoRestante = tiempoNivel;
+                actualizarDisplayReloj();
+            }
+        }
+
+        function cerrarReloj() {
+            document.getElementById('pantallaReloj').style.display = 'none';
+            document.getElementById('appPrincipal').style.display = 'block';
+        }
+
+        function actualizarDisplayReloj() {
+            let m = Math.floor(tiempoRestante / 60);
+            let s = Math.floor(tiempoRestante % 60);
+            document.getElementById('relojTiempo').innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function toggleReloj() {
+            const btn = document.getElementById('btnPlayPause');
+            if(relojCorriendo) {
+                clearInterval(relojInterval);
+                relojCorriendo = false;
+                btn.innerHTML = '▶️ CONTINUAR';
+                btn.style.backgroundColor = '#4CAF50';
+            } else {
+                relojCorriendo = true;
+                btn.innerHTML = '⏸️ PAUSA (ALL-IN)';
+                btn.style.backgroundColor = '#e63946';
+                relojInterval = setInterval(() => {
+                    if(tiempoRestante > 0) {
+                        tiempoRestante--;
+                        actualizarDisplayReloj();
+                    } else {
+                        clearInterval(relojInterval);
+                        relojCorriendo = false;
+                        btn.innerHTML = '▶️ INICIAR SIGUIENTE';
+                        btn.style.backgroundColor = '#4CAF50';
+                        alert("⏰ ¡TIEMPO! SUBEN LAS CIEGAS.");
+                        siguienteNivel();
+                    }
+                }, 1000);
+            }
+        }
+
+        function siguienteNivel() {
+            nivelActual++;
+            document.getElementById('relojNivel').innerText = esHeadsUp ? `NIVEL ${nivelActual} (HEADS UP)` : `NIVEL ${nivelActual}`;
+            tiempoRestante = tiempoNivel;
+            actualizarDisplayReloj();
+            if(relojCorriendo) { clearInterval(relojInterval); relojCorriendo = false; toggleReloj(); } // Auto-arranca
+        }
+
+        function modoHeadsUp() {
+            if(esHeadsUp) return;
+            esHeadsUp = true;
+            tiempoNivel = Math.floor(tiempoNivel / 2); // La guillotina a la mitad
+            tiempoRestante = tiempoNivel;
+            document.getElementById('btnHeadsUp').style.display = 'none';
+            document.getElementById('relojNivel').innerText = `NIVEL ${nivelActual} (HEADS UP)`;
+            document.getElementById('relojNivel').style.color = "#e63946";
+            actualizarDisplayReloj();
+        }
+
+        // --- LÓGICA DE PADRÓN Y FINANZAS (IGUAL QUE SIEMPRE) ---
         async function cargarPadron() {
             try {
                 let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
                 let data = await response.json();
                 if (data.error) { alert(data.error); return; }
-                
                 todosLosJugadores = data.jugadores || [];
                 historialFechas = data.fechasJugadas || []; 
                 renderizarTodosLosMeses();
@@ -117,24 +223,19 @@
             meses.forEach(m => selectMes.innerHTML += `<option value="${m}">${m}</option>`);
         }
 
-        // --- EL CEREBRO DE LA PANTALLA INTELIGENTE ---
         function detectarModoInteligente() {
             const mes = document.getElementById('mesFecha').value;
             if (!mes) return;
-
             const yaJugado = historialFechas.includes(mes + "-" + anioActual);
             const btn = document.getElementById('btnLiquidar');
-            
             if (yaJugado) {
-                // MODO LUNES (PRENSA)
                 document.getElementById('areaFinanzas1').style.display = 'none';
                 document.getElementById('areaFinanzas2').style.display = 'none';
                 btn.innerText = "📰 PUBLICAR CRÓNICA DE JACK";
                 btn.style.backgroundColor = "var(--jack-accent)";
-                btn.disabled = true; // Empieza bloqueado hasta que escriban
+                btn.disabled = true; 
                 validarJack();
             } else {
-                // MODO DOMINGO (CAJA)
                 document.getElementById('areaFinanzas1').style.display = 'block';
                 document.getElementById('areaFinanzas2').style.display = 'block';
                 btn.innerText = "🚀 LIQUIDAR CAJA (DOMINGO)";
@@ -145,18 +246,14 @@
 
         function validarJack() {
             const mes = document.getElementById('mesFecha').value;
-            if (!historialFechas.includes(mes + "-" + anioActual)) return; // Si no es Lunes, no filtra
-            
+            if (!historialFechas.includes(mes + "-" + anioActual)) return; 
             const bardo = document.getElementById('jackBardo').value;
             const manos = document.getElementById('jackManos').value;
             const btn = document.getElementById('btnLiquidar');
-            
-            // Filtro de calidad: Más de 15 caracteres y que no sea "aaaaaa"
             const valido = (bardo.length > 15 && manos.length > 15) && !/^(.)\1+$/.test(bardo);
             btn.disabled = !valido;
         }
 
-        // --- FUNCIONES DE MATRIZ Y GASTOS (IGUAL QUE SIEMPRE) ---
         function renderizarMatriz() {
             const area = document.getElementById('checkinArea'); area.innerHTML = '';
             todosLosJugadores.forEach(j => {
@@ -185,7 +282,6 @@
             for(let i=1; i<=jugT2.length; i++) document.getElementById('torneo2').innerHTML += `<select id="t2_pos${i}">${oT2}</select>`;
         }
 
-        // --- ENVÍO INTELIGENTE ---
         function enviarDatos() {
             const mes = document.getElementById('mesFecha').value;
             if(!mes) { alert("Elegí un mes."); return; }
