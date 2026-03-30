@@ -10,6 +10,9 @@
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 15px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
         h2 { text-align: center; color: var(--gold-accent); letter-spacing: 2px; margin-bottom: 5px; }
         
+        /* 🛡️ ARRANQUE CIEGO: Todo oculto hasta que el servidor apruebe el DNI */
+        #appPrincipal { display: none; }
+
         .btn-ranking-link { display: block; text-decoration: none; background: linear-gradient(90deg, #111, #224a2e, #111); border: 1px solid var(--gold-accent); border-radius: 8px; padding: 12px; margin-bottom: 20px; color: var(--gold-accent); text-transform: uppercase; font-weight: bold; text-align: center; letter-spacing: 1px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transition: all 0.2s ease; }
         .btn-ranking-link:active { transform: scale(0.98); background: var(--gold-accent); color: #111; }
 
@@ -103,12 +106,7 @@
 
     <script>
         let tg;
-        try { 
-            tg = window.Telegram.WebApp; tg.expand(); 
-            const ids = [1149173434, 7721937940]; 
-            const uId = tg.initDataUnsafe?.user?.id;
-            if (uId && !ids.includes(uId)) { document.body.innerHTML = "⛔ ACCESO DENEGADO"; setTimeout(()=>tg.close(),3000); }
-        } catch(e) {}
+        try { tg = window.Telegram.WebApp; tg.expand(); } catch(e) {}
 
         const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbzaxfJJyLgAchlTBPrgM4GRfwSHmQyl3_UtU_FIi0Pt29ZjyLeW4uEfhLdopDBJkZAd/exec"; 
         const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
@@ -129,15 +127,14 @@
 
         function calcularTiempoDinámico() {
             const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente).length;
-            if(presentes === 0) return 12; // Resguardo por si no tildaron a nadie aún
-            return 8 + (presentes * 0.5); // 8 mins base + 30 segs por mono
+            if(presentes === 0) return 12; 
+            return 8 + (presentes * 0.5); 
         }
 
         function abrirReloj() {
             document.getElementById('appPrincipal').style.display = 'none';
             document.getElementById('pantallaReloj').style.display = 'flex';
             
-            // Auto-calcular tiempo basado en la matriz solo la primera vez que se abre
             if(!relojCorriendo && nivelActual === 1 && !esHeadsUp) {
                 let mins = calcularTiempoDinámico();
                 tiempoNivel = Math.floor(mins * 60);
@@ -189,13 +186,13 @@
             document.getElementById('relojNivel').innerText = esHeadsUp ? `NIVEL ${nivelActual} (HEADS UP)` : `NIVEL ${nivelActual}`;
             tiempoRestante = tiempoNivel;
             actualizarDisplayReloj();
-            if(relojCorriendo) { clearInterval(relojInterval); relojCorriendo = false; toggleReloj(); } // Auto-arranca
+            if(relojCorriendo) { clearInterval(relojInterval); relojCorriendo = false; toggleReloj(); } 
         }
 
         function modoHeadsUp() {
             if(esHeadsUp) return;
             esHeadsUp = true;
-            tiempoNivel = Math.floor(tiempoNivel / 2); // La guillotina a la mitad
+            tiempoNivel = Math.floor(tiempoNivel / 2); 
             tiempoRestante = tiempoNivel;
             document.getElementById('btnHeadsUp').style.display = 'none';
             document.getElementById('relojNivel').innerText = `NIVEL ${nivelActual} (HEADS UP)`;
@@ -203,17 +200,35 @@
             actualizarDisplayReloj();
         }
 
-        // --- LÓGICA DE PADRÓN Y FINANZAS (IGUAL QUE SIEMPRE) ---
+        // --- LÓGICA DE PADRÓN, SEGURIDAD CERO-CONFIANZA Y FINANZAS ---
         async function cargarPadron() {
             try {
-                let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
+                const uId = tg?.initDataUnsafe?.user?.id || "NADA";
+                let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO + "&uId=" + uId);
                 let data = await response.json();
-                if (data.error) { alert(data.error); return; }
+                
+                if (data.error === "INTRUSO_RECHAZADO") {
+                    document.body.innerHTML = `
+                        <div style="text-align: center; margin-top: 50px;">
+                            <h1 style="color: #ff4444; font-size: 60px; margin-bottom: 0;">⛔</h1>
+                            <h2 style="color: #ff4444; font-family: monospace;">ACCESO DENEGADO</h2>
+                            <p style="color: #888;">No figurás en la lista de Administradores.</p>
+                        </div>`;
+                    setTimeout(() => { if(tg) tg.close(); }, 3500);
+                    return;
+                }
+
+                if (data.error) { alert("Error del servidor: " + data.error); return; }
+                
+                document.getElementById('appPrincipal').style.display = 'block';
+                
                 todosLosJugadores = data.jugadores || [];
                 historialFechas = data.fechasJugadas || []; 
                 renderizarTodosLosMeses();
                 renderizarMatriz();
-            } catch (error) {}
+            } catch (error) {
+                alert("Error de conexión. Intentá de nuevo.");
+            }
         }
 
         function renderizarTodosLosMeses() {
@@ -228,6 +243,7 @@
             if (!mes) return;
             const yaJugado = historialFechas.includes(mes + "-" + anioActual);
             const btn = document.getElementById('btnLiquidar');
+            
             if (yaJugado) {
                 document.getElementById('areaFinanzas1').style.display = 'none';
                 document.getElementById('areaFinanzas2').style.display = 'none';
