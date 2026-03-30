@@ -21,7 +21,6 @@
         select, input, textarea { width: 100%; padding: 10px; margin-top: 5px; border-radius: 6px; border: 1px solid #444; background-color: var(--input-bg); color: white; box-sizing: border-box; font-family: inherit; }
         textarea { resize: vertical; min-height: 60px; }
         
-        /* CSS MATRIZ TÁCTICA */
         .player-row { background: #111; padding: 10px; border-radius: 8px; border: 1px solid #444; margin-top: 10px; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: bold; color: var(--gold-accent); cursor: pointer; }
         .checkbox-item input { width: 18px; height: 18px; margin: 0; }
@@ -29,7 +28,8 @@
         .toggle-btn { flex: 1; padding: 6px 2px; border-radius: 4px; border: 1px solid #555; font-size: 11px; font-weight: bold; cursor: pointer; background-color: #333; color: #888; transition: all 0.2s; margin-top: 0; }
         .toggle-btn.active { background-color: var(--gold-accent); color: #111; border-color: var(--gold-accent); }
 
-        button.btn-main { width: 100%; padding: 15px; margin-top: 10px; background-color: var(--gold-accent); color: #111; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button.btn-main { width: 100%; padding: 15px; margin-top: 10px; background-color: var(--gold-accent); color: #111; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button.btn-main:disabled { background-color: #555; color: #888; cursor: not-allowed; }
         .btn-gasto { background-color: #32613f; color: white; margin-bottom: 15px; border: 1px dashed var(--gold-accent); width: 100%; padding: 15px; border-radius: 8px; font-weight: bold; }
         .gasto-row { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
     </style>
@@ -37,73 +37,61 @@
 <body>
     <h2>♠️ LAPC ♣️</h2> 
     
-    <a href="ranking.html" class="btn-ranking-link">👑 VER LEADERBOARD OFICIAL 👑</a>
+    <a href="ranking.html" class="btn-ranking-link">📊 ESTADÍSTICAS (LEADER, FORT Y FECHAS)</a>
 
-    <div class="section-card">
-        <h3>📍 Matriz de Asistencia y Consumos</h3>
-        <div id="checkinArea">⏳ Conectando con el Padrón...</div>
-    </div>
-    
     <div class="section-card">
         <h3>📅 Datos de la Jornada</h3>
         <label>Mes de la Fecha</label>
-        <select id="mesFecha"><option value="">⏳ Evaluando fechas disponibles...</option></select>
-        <label>Tipo de Torneo</label>
-        <select id="tipoTorneo"><option value="Slam">Slam (Puntos 100%)</option><option value="GrandSlam">Grand Slam (Puntos 150%)</option></select>
+        <select id="mesFecha" onchange="detectarModoInteligente()"><option value="">⏳ Conectando al servidor...</option></select>
+        
+        <div id="areaFinanzas1">
+            <label>Tipo de Torneo</label>
+            <select id="tipoTorneo"><option value="Slam">Slam (Puntos 100%)</option><option value="GrandSlam">Grand Slam (Puntos 150%)</option></select>
+            <label>Valor de la Entrada (Buy-in)</label>
+            <input type="number" id="valorBuyIn" value="6000" style="font-weight: bold; color: var(--gold-accent);">
+        </div>
     </div>
 
-    <div class="section-card section-jack">
+    <div id="areaFinanzas2">
+        <div class="section-card">
+            <h3>📍 Matriz de Asistencia y Consumos</h3>
+            <div id="checkinArea">⏳ Cargando...</div>
+        </div>
+
+        <div class="section-card">
+            <h3>💸 La Caja (Gastos)</h3>
+            <div id="gastosContainer"></div>
+            <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
+        </div>
+
+        <div class="section-card"><h3>🏆 Torneo 1</h3><div id="torneo1"></div></div>
+        <div class="section-card"><h3>🏆 Torneo 2</h3><div id="torneo2"></div></div>
+    </div>
+
+    <div class="section-card section-jack" id="areaJack">
         <h3>🎙️ Memorias de Jack Rivers</h3>
-        <label>🏠 Sede / Lugar</label><input type="text" id="jackLugar" placeholder="Ej: Rifle House, Casa de Marley...">
-        <label>🥩 El Menú</label><textarea id="jackComida" placeholder="Ej: Bondiola de Nico con cebollas..."></textarea>
-        <label>🍻 Hidratación</label><input type="text" id="jackBebida" placeholder="Ej: IPA helada, Fernet negro...">
-        <label>🃏 Manos Increíbles</label><textarea id="jackManos" placeholder="Ej: Daro color al As sepulta a Sólido..."></textarea>
-        <label>🔥 El Bardo</label><textarea id="jackBardo" placeholder="Ej: Salidas a comprar puchos..."></textarea>
+        <label>🏠 Sede / Lugar</label><input type="text" id="jackLugar" placeholder="Ej: Rifle House...">
+        <label>🥩 El Menú</label><textarea id="jackComida" placeholder="Ej: Bondiola..." oninput="validarJack()"></textarea>
+        <label>🍻 Hidratación</label><input type="text" id="jackBebida" placeholder="Ej: IPA y Fernet..." oninput="validarJack()"></textarea>
+        <label>🃏 Manos Increíbles</label><textarea id="jackManos" placeholder="Ej: Daro color al As..." oninput="validarJack()"></textarea>
+        <label>🔥 El Bardo</label><textarea id="jackBardo" placeholder="Ej: Bardo con las fichas..." oninput="validarJack()"></textarea>
     </div>
     
-    <div class="section-card">
-        <h3>💰 Configuración de la Fecha</h3>
-        <label>Valor de la Entrada (Buy-in por Torneo)</label>
-        <input type="number" id="valorBuyIn" value="6000" style="font-weight: bold; color: var(--gold-accent);">
-    </div>
-
-    <div class="section-card">
-        <h3>💸 La Caja (Gastos)</h3>
-        <div id="gastosContainer"></div>
-        <button class="btn-gasto" onclick="agregarGasto()">➕ Agregar Gasto</button>
-    </div>
-
-    <div class="section-card">
-        <h3>🏆 Torneo 1</h3>
-        <div id="torneo1"></div>
-    </div>
-
-    <div class="section-card">
-        <h3>🏆 Torneo 2</h3>
-        <div id="torneo2"></div>
-    </div>
-
-    <button id="btnLiquidar" class="btn-main" onclick="enviarDatos()">🚀 LIQUIDAR Y GENERAR CRÓNICA</button>
+    <button id="btnLiquidar" class="btn-main" onclick="enviarDatos()">🚀 LIQUIDAR CAJA (DOMINGO)</button>
 
     <script>
         let tg;
         try { 
-            tg = window.Telegram.WebApp; 
-            tg.expand(); 
-            const idsPermitidos = [1149173434, 7721937940]; 
-            const usuarioActual = tg.initDataUnsafe?.user?.id;
-            
-            if (usuarioActual && !idsPermitidos.includes(usuarioActual)) {
-                document.body.innerHTML = `<div style="text-align: center; margin-top: 50px;"><h1 style="color: #ff4444; font-size: 50px;">⛔</h1><h2 style="color: #ff4444;">ACCESO DENEGADO</h2></div>`;
-                setTimeout(() => { tg.close(); }, 3000);
-                throw new Error("Intruso detectado");
-            }
+            tg = window.Telegram.WebApp; tg.expand(); 
+            const ids = [1149173434, 7721937940]; 
+            const uId = tg.initDataUnsafe?.user?.id;
+            if (uId && !ids.includes(uId)) { document.body.innerHTML = "⛔ ACCESO DENEGADO"; setTimeout(()=>tg.close(),3000); }
         } catch(e) {}
 
         const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbzaxfJJyLgAchlTBPrgM4GRfwSHmQyl3_UtU_FIi0Pt29ZjyLeW4uEfhLdopDBJkZAd/exec"; 
         const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
-        let matrizJugadores = {}; // EL NUEVO CEREBRO DE ESTADOS
+        let matrizJugadores = {}; 
         let todosLosJugadores = [];
         let gastoCount = 0;
         let historialFechas = []; 
@@ -113,208 +101,142 @@
             try {
                 let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
                 let data = await response.json();
-                
-                if (data.error) {
-                    document.getElementById('checkinArea').innerHTML = `❌ ${data.error}`;
-                    return;
-                }
+                if (data.error) { alert(data.error); return; }
                 
                 todosLosJugadores = data.jugadores || [];
                 historialFechas = data.fechasJugadas || []; 
+                renderizarTodosLosMeses();
                 renderizarMatriz();
-                renderizarMesesPredictivos(); 
-            } catch (error) {
-                document.getElementById('checkinArea').innerHTML = "❌ Error conectando con la base financiera.";
-            }
+            } catch (error) {}
         }
 
-        function renderizarMesesPredictivos() {
+        function renderizarTodosLosMeses() {
             const selectMes = document.getElementById('mesFecha');
-            selectMes.innerHTML = '';
-            const todosLosMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const mesesDisponibles = todosLosMeses.filter(mes => {
-                const idBuscado = mes + "-" + anioActual; 
-                return !historialFechas.includes(idBuscado) && !historialFechas.includes(mes+"-1") && !historialFechas.includes(mes+"-2");
-            });
+            selectMes.innerHTML = '<option value="">Seleccionar Mes...</option>';
+            const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            meses.forEach(m => selectMes.innerHTML += `<option value="${m}">${m}</option>`);
+        }
 
-            if (mesesDisponibles.length === 0) {
-                selectMes.innerHTML = '<option value="">🏆 TEMPORADA COMPLETADA</option>';
-                document.getElementById('btnLiquidar').disabled = true;
-                document.getElementById('btnLiquidar').innerText = "⛔ AÑO CERRADO";
-                document.getElementById('btnLiquidar').style.backgroundColor = "#555";
+        // --- EL CEREBRO DE LA PANTALLA INTELIGENTE ---
+        function detectarModoInteligente() {
+            const mes = document.getElementById('mesFecha').value;
+            if (!mes) return;
+
+            const yaJugado = historialFechas.includes(mes + "-" + anioActual);
+            const btn = document.getElementById('btnLiquidar');
+            
+            if (yaJugado) {
+                // MODO LUNES (PRENSA)
+                document.getElementById('areaFinanzas1').style.display = 'none';
+                document.getElementById('areaFinanzas2').style.display = 'none';
+                btn.innerText = "📰 PUBLICAR CRÓNICA DE JACK";
+                btn.style.backgroundColor = "var(--jack-accent)";
+                btn.disabled = true; // Empieza bloqueado hasta que escriban
+                validarJack();
             } else {
-                mesesDisponibles.forEach(mes => { selectMes.innerHTML += `<option value="${mes}">${mes}</option>`; });
+                // MODO DOMINGO (CAJA)
+                document.getElementById('areaFinanzas1').style.display = 'block';
+                document.getElementById('areaFinanzas2').style.display = 'block';
+                btn.innerText = "🚀 LIQUIDAR CAJA (DOMINGO)";
+                btn.style.backgroundColor = "var(--gold-accent)";
+                btn.disabled = false;
             }
         }
 
-        // MOTOR DE LA MATRIZ VISUAL
+        function validarJack() {
+            const mes = document.getElementById('mesFecha').value;
+            if (!historialFechas.includes(mes + "-" + anioActual)) return; // Si no es Lunes, no filtra
+            
+            const bardo = document.getElementById('jackBardo').value;
+            const manos = document.getElementById('jackManos').value;
+            const btn = document.getElementById('btnLiquidar');
+            
+            // Filtro de calidad: Más de 15 caracteres y que no sea "aaaaaa"
+            const valido = (bardo.length > 15 && manos.length > 15) && !/^(.)\1+$/.test(bardo);
+            btn.disabled = !valido;
+        }
+
+        // --- FUNCIONES DE MATRIZ Y GASTOS (IGUAL QUE SIEMPRE) ---
         function renderizarMatriz() {
-            const area = document.getElementById('checkinArea');
-            area.innerHTML = '';
+            const area = document.getElementById('checkinArea'); area.innerHTML = '';
             todosLosJugadores.forEach(j => {
                 matrizJugadores[j] = { presente: false, t1: true, t2: true, comida: true, bebida: true };
-                let safeId = j.replace(/\\s+/g, '_');
-                
-                area.innerHTML += `
-                    <div class="player-row">
-                        <label class="checkbox-item">
-                            <input type="checkbox" id="chk_${safeId}" onchange="togglePresente('${j}', '${safeId}')"> ${j}
-                        </label>
-                        <div class="matrix-toggles" id="toggles_${safeId}" style="display:none;">
-                            <button type="button" class="toggle-btn active" id="btn_t1_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 't1')">🏆 T1</button>
-                            <button type="button" class="toggle-btn active" id="btn_t2_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 't2')">🏆 T2</button>
-                            <button type="button" class="toggle-btn active" id="btn_comida_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 'comida')">🥩 Comida</button>
-                            <button type="button" class="toggle-btn active" id="btn_bebida_${safeId}" onclick="toggleOpcion('${j}', '${safeId}', 'bebida')">🍻 Bebida</button>
-                        </div>
-                    </div>
-                `;
+                let sId = j.replace(/\s+/g, '_');
+                area.innerHTML += `<div class="player-row"><label class="checkbox-item"><input type="checkbox" id="chk_${sId}" onchange="toggleP('${j}', '${sId}')"> ${j}</label><div class="matrix-toggles" id="toggles_${sId}" style="display:none;"><button type="button" class="toggle-btn active" id="btn_t1_${sId}" onclick="toggleO('${j}', '${sId}', 't1')">🏆 T1</button><button type="button" class="toggle-btn active" id="btn_t2_${sId}" onclick="toggleO('${j}', '${sId}', 't2')">🏆 T2</button><button type="button" class="toggle-btn active" id="btn_comida_${sId}" onclick="toggleO('${j}', '${sId}', 'comida')">🥩 Comida</button><button type="button" class="toggle-btn active" id="btn_bebida_${sId}" onclick="toggleO('${j}', '${sId}', 'bebida')">🍻 Bebida</button></div></div>`;
             });
         }
-
-        function togglePresente(nombre, safeId) {
-            const isChecked = document.getElementById(`chk_${safeId}`).checked;
-            matrizJugadores[nombre].presente = isChecked;
-            document.getElementById(`toggles_${safeId}`).style.display = isChecked ? 'flex' : 'none';
-            actualizarEcosistema();
-        }
-
-        function toggleOpcion(nombre, safeId, opcion) {
-            matrizJugadores[nombre][opcion] = !matrizJugadores[nombre][opcion];
-            const btn = document.getElementById(`btn_${opcion}_${safeId}`);
-            if (matrizJugadores[nombre][opcion]) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-            actualizarEcosistema();
-        }
-
-        function actualizarEcosistema() {
-            document.getElementById('gastosContainer').innerHTML = '';
-            gastoCount = 0;
-            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
-            if (presentes.length > 0) { agregarGasto(); }
-            poblarTorneos();
-        }
+        function toggleP(n, sId) { matrizJugadores[n].presente = document.getElementById(`chk_${sId}`).checked; document.getElementById(`toggles_${sId}`).style.display = matrizJugadores[n].presente ? 'flex' : 'none'; act(); }
+        function toggleO(n, sId, o) { matrizJugadores[n][o] = !matrizJugadores[n][o]; document.getElementById(`btn_${o}_${sId}`).classList.toggle('active', matrizJugadores[n][o]); act(); }
+        function act() { document.getElementById('gastosContainer').innerHTML = ''; gastoCount = 0; if(Object.keys(matrizJugadores).some(j=>matrizJugadores[j].presente)) agregarGasto(); poblarTorneos(); }
 
         function agregarGasto() {
             gastoCount++;
-            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
-            let options = '<option value="">Seleccionar...</option>';
-            presentes.forEach(j => options += `<option value="${j}">${j}</option>`);
-            
-            const html = `
-                <div class="gasto-row" id="gasto${gastoCount}">
-                    <label>¿Quién pagó?</label><select class="pagador">${options}</select>
-                    <label>Monto ($)</label><input type="number" class="monto" placeholder="Ej: 15000">
-                    <label>Concepto (División)</label>
-                    <select class="concepto">
-                        <option value="Comida">🥩 Comida (Solo los que comieron)</option>
-                        <option value="Bebida">🍻 Bebida (Solo los que bebieron)</option>
-                        <option value="Varios">📦 Varios (Entre TODOS los presentes)</option>
-                    </select>
-                </div>`;
-            document.getElementById('gastosContainer').insertAdjacentHTML('beforeend', html);
+            let opts = '<option value="">Quién...</option>'; Object.keys(matrizJugadores).filter(j=>matrizJugadores[j].presente).forEach(j => opts += `<option value="${j}">${j}</option>`);
+            document.getElementById('gastosContainer').insertAdjacentHTML('beforeend', `<div class="gasto-row" id="gasto${gastoCount}"><select class="pagador">${opts}</select><input type="number" class="monto" placeholder="Monto ($)"><select class="concepto"><option value="Comida">🥩 Comida</option><option value="Bebida">🍻 Bebida</option><option value="Varios">📦 Varios</option></select></div>`);
         }
 
         function poblarTorneos() {
-            const medallas = ["🥇 1º", "🥈 2º", "🥉 3º", "🏅 4º", "💀 5º", "💀 6º", "💀 7º", "💀 8º", "💀 9º", "💀 10º"];
-            
-            // Filtramos exacto quién juega qué
             const jugT1 = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente && matrizJugadores[j].t1);
             const jugT2 = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente && matrizJugadores[j].t2);
-
-            let optT1 = '<option value="">Seleccionar...</option>';
-            jugT1.forEach(j => optT1 += `<option value="${j}">${j}</option>`);
-
-            let optT2 = '<option value="">Seleccionar...</option>';
-            jugT2.forEach(j => optT2 += `<option value="${j}">${j}</option>`);
-
-            document.getElementById('torneo1').innerHTML = `<div style="font-size:12px; color:#aaa; margin-bottom:10px;">Jugadores en T1: ${jugT1.length}</div>`;
-            document.getElementById('torneo2').innerHTML = `<div style="font-size:12px; color:#aaa; margin-bottom:10px;">Jugadores en T2: ${jugT2.length}</div>`;
-
-            for(let i=1; i<=jugT1.length; i++) {
-                let m = medallas[i-1] || `💀 ${i}º`;
-                document.getElementById('torneo1').innerHTML += `<label>${m} Puesto</label><select id="t1_pos${i}" onchange="validarUnicos('t1', ${jugT1.length})">${optT1}</select>`;
-            }
-            for(let i=1; i<=jugT2.length; i++) {
-                let m = medallas[i-1] || `💀 ${i}º`;
-                document.getElementById('torneo2').innerHTML += `<label>${m} Puesto</label><select id="t2_pos${i}" onchange="validarUnicos('t2', ${jugT2.length})">${optT2}</select>`;
-            }
+            let oT1 = '<option value="">Jugador...</option>'; jugT1.forEach(j => oT1 += `<option value="${j}">${j}</option>`);
+            let oT2 = '<option value="">Jugador...</option>'; jugT2.forEach(j => oT2 += `<option value="${j}">${j}</option>`);
+            document.getElementById('torneo1').innerHTML = ''; document.getElementById('torneo2').innerHTML = '';
+            for(let i=1; i<=jugT1.length; i++) document.getElementById('torneo1').innerHTML += `<select id="t1_pos${i}">${oT1}</select>`;
+            for(let i=1; i<=jugT2.length; i++) document.getElementById('torneo2').innerHTML += `<select id="t2_pos${i}">${oT2}</select>`;
         }
 
-        function validarUnicos(torneo, cantidad) {
-            let seleccionados = [];
-            for(let i=1; i<=cantidad; i++) {
-                let val = document.getElementById(`${torneo}_pos${i}`)?.value;
-                if(val) seleccionados.push(val);
-            }
-            for(let i=1; i<=cantidad; i++) {
-                let select = document.getElementById(`${torneo}_pos${i}`);
-                if(select) {
-                    let currentVal = select.value;
-                    Array.from(select.options).forEach(opt => {
-                        opt.disabled = (opt.value !== "" && opt.value !== currentVal && seleccionados.includes(opt.value));
-                    });
-                }
-            }
-        }
-
+        // --- ENVÍO INTELIGENTE ---
         function enviarDatos() {
-            const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
-            if(presentes.length === 0) { alert("Tildá al menos a un jugador en la Matriz."); return; }
-            
-            const mesIngresado = document.getElementById('mesFecha').value;
-            if(!mesIngresado) { alert("No hay un mes válido para liquidar."); return; }
+            const mes = document.getElementById('mesFecha').value;
+            if(!mes) { alert("Elegí un mes."); return; }
 
-            if (historialFechas.includes(mesIngresado + "-" + anioActual)) {
-                alert(`⚠️ ALTO AHÍ: El torneo de "${mesIngresado} ${anioActual}" ya está liquidado.`); return; 
-            }
-
+            const yaJugado = historialFechas.includes(mes + "-" + anioActual);
+            const modoActual = yaJugado ? "prensa" : "liquidar";
             const btn = document.getElementById('btnLiquidar');
-            btn.innerText = "⏳ PROCESANDO LA MATRIZ..."; btn.disabled = true;
             
-            const data = { 
-                mes: mesIngresado, nroFecha: anioActual, tipoTorneo: document.getElementById('tipoTorneo').value,
-                buyIn: document.getElementById('valorBuyIn').value,
-                matriz: matrizJugadores, // ENVIAMOS LA MATRIZ COMPLETA AL SERVIDOR
-                cronicaJack: {
-                    lugar: document.getElementById('jackLugar').value, comida: document.getElementById('jackComida').value,
-                    bebida: document.getElementById('jackBebida').value, manos: document.getElementById('jackManos').value,
-                    bardo: document.getElementById('jackBardo').value
-                },
-                gastos: [], torneo1: {}, torneo2: {} 
+            let data = { 
+                modo: modoActual, mes: mes, nroFecha: anioActual,
+                cronicaJack: { lugar: document.getElementById('jackLugar').value, comida: document.getElementById('jackComida').value, bebida: document.getElementById('jackBebida').value, manos: document.getElementById('jackManos').value, bardo: document.getElementById('jackBardo').value }
             };
 
-            for(let i=1; i<=gastoCount; i++) {
-                const row = document.getElementById(`gasto${i}`);
-                if(row) {
-                    const pagador = row.querySelector('.pagador').value, monto = row.querySelector('.monto').value, concepto = row.querySelector('.concepto').value;
-                    if(pagador && monto) data.gastos.push({ pagador, monto, concepto });
+            if (modoActual === "liquidar") {
+                const presentes = Object.keys(matrizJugadores).filter(j => matrizJugadores[j].presente);
+                if(presentes.length === 0) { alert("Tildá al menos a un jugador en la Matriz."); return; }
+                
+                data.tipoTorneo = document.getElementById('tipoTorneo').value;
+                data.buyIn = document.getElementById('valorBuyIn').value;
+                data.matriz = matrizJugadores;
+                data.gastos = [];
+                for(let i=1; i<=gastoCount; i++) {
+                    const row = document.getElementById(`gasto${i}`);
+                    if(row) {
+                        const pagador = row.querySelector('.pagador').value, monto = row.querySelector('.monto').value, concepto = row.querySelector('.concepto').value;
+                        if(pagador && monto) data.gastos.push({ pagador, monto, concepto });
+                    }
                 }
+                data.torneo1 = {}; data.torneo2 = {};
+                const jugT1 = presentes.filter(j => matrizJugadores[j].t1);
+                const jugT2 = presentes.filter(j => matrizJugadores[j].t2);
+                for(let i=1; i<=jugT1.length; i++) data.torneo1[`pos${i}`] = document.getElementById(`t1_pos${i}`).value || "";
+                for(let i=1; i<=jugT2.length; i++) data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || "";
+                
+                btn.innerText = "⏳ PROCESANDO CAJA...";
+            } else {
+                btn.innerText = "⏳ REDACTANDO CRÓNICA...";
             }
-            
-            const jugT1 = presentes.filter(j => matrizJugadores[j].t1);
-            const jugT2 = presentes.filter(j => matrizJugadores[j].t2);
-            
-            for(let i=1; i<=jugT1.length; i++) { data.torneo1[`pos${i}`] = document.getElementById(`t1_pos${i}`).value || ""; }
-            for(let i=1; i<=jugT2.length; i++) { data.torneo2[`pos${i}`] = document.getElementById(`t2_pos${i}`).value || ""; }
 
+            btn.disabled = true;
             const formData = new FormData();
             formData.append("token", MI_TOKEN_SECRETO); formData.append("datos", JSON.stringify(data));
 
-         fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
+            fetch(googleWebhookUrl, { method: 'POST', mode: 'no-cors', body: formData })
             .then(() => {
-                // 🚀 INNOVACIÓN VISUAL: Chau alert(), hola botón inteligente
-                btn.innerText = "✅ ¡MATRIZ LIQUIDADA!"; 
-                btn.style.backgroundColor = "#4CAF50"; // Verde éxito
-                btn.style.color = "white";
-                
-                // Cerramos la app solos después de 2.5 segundos
+                btn.innerText = modoActual === "liquidar" ? "✅ CAJA LIQUIDADA" : "✅ NOTA PUBLICADA"; 
+                btn.style.backgroundColor = "#4CAF50"; btn.style.color = "white";
                 setTimeout(() => { if(tg) tg.close(); }, 2500);
             }).catch(error => { 
                 alert("❌ Error de red."); 
-                btn.innerText = "🚀 LIQUIDAR Y GENERAR CRÓNICA"; 
+                btn.innerText = "REINTENTAR"; 
                 btn.disabled = false;
             });
         }
