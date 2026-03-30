@@ -6,114 +6,136 @@
     <title>Ranking LAPC</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; }
+        :root { --bg-color: #1a1a1a; --card-bg: #224a2e; --text-color: #ffffff; --gold-accent: #d4af37; --fort-color: #28a745; --blue-accent: #3a7bd5; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; background-color: var(--bg-color); color: var(--text-color); margin: 0; }
-        h1 { text-align: center; color: var(--gold-accent); letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase; font-size: 28px; }
-        .subtitle { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        h1 { text-align: center; color: var(--gold-accent); letter-spacing: 3px; margin-bottom: 5px; text-transform: uppercase; font-size: 26px; }
         
-        .ranking-container { background-color: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #32613f; box-shadow: 0 8px 16px rgba(0,0,0,0.4); }
-        .row { display: flex; align-items: center; padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .row:last-child { border-bottom: none; }
-        
-        .pos { width: 40px; font-size: 20px; font-weight: bold; color: #888; text-align: center; }
-        .name { flex-grow: 1; font-size: 18px; font-weight: bold; padding-left: 10px; }
-        .points { font-size: 18px; color: var(--gold-accent); font-weight: bold; text-align: right; }
-        .stats { font-size: 11px; color: #aaa; text-align: right; display: block; margin-top: 3px; }
+        .switch-container { display: flex; justify-content: center; margin-bottom: 20px; background: #111; border-radius: 8px; padding: 5px; border: 1px solid #444; gap: 5px; }
+        .switch-btn { flex: 1; padding: 10px 5px; border: none; background: transparent; color: #666; font-weight: bold; font-size: 11px; cursor: pointer; border-radius: 6px; transition: all 0.3s; }
+        .active-pts { background-color: var(--gold-accent) !important; color: #111 !important; }
+        .active-fort { background-color: var(--fort-color) !important; color: #fff !important; }
+        .active-hist { background-color: var(--blue-accent) !important; color: #fff !important; }
 
-        .rank-1 .pos { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); font-size: 26px; }
-        .rank-2 .pos { color: #C0C0C0; font-size: 24px; }
-        .rank-3 .pos { color: #CD7F32; font-size: 22px; }
-        
-        .loading { text-align: center; color: var(--gold-accent); padding: 40px; font-size: 18px; }
+        .ranking-container { background-color: var(--card-bg); border-radius: 12px; padding: 15px; border: 1px solid #32613f; box-shadow: 0 8px 16px rgba(0,0,0,0.4); margin-bottom: 20px; }
+        .row { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .pos { width: 35px; font-size: 18px; font-weight: bold; color: #888; text-align: center; }
+        .name { flex-grow: 1; font-size: 16px; font-weight: bold; padding-left: 10px; }
+        .points { font-size: 16px; color: var(--gold-accent); font-weight: bold; text-align: right; }
+        .stats { font-size: 10px; color: #aaa; text-align: right; }
 
-        .btn-volver {
-            display: block; 
-            text-decoration: none; 
-            background-color: #32613f; 
-            border: 1px dashed var(--gold-accent); 
-            border-radius: 8px; 
-            padding: 12px; 
-            margin-bottom: 20px; 
-            color: white; 
-            text-transform: uppercase; 
-            font-weight: bold; 
-            text-align: center; 
-            margin-top: 20px;
-        }
+        /* Estilos Historial */
+        .hist-header { background: #111; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; }
+        select { background: #2d2d2d; color: white; border: 1px solid var(--blue-accent); padding: 8px; border-radius: 5px; width: 100%; font-weight: bold; }
+        .torneo-label { color: var(--blue-accent); font-weight: bold; font-size: 14px; margin: 15px 0 5px 5px; text-transform: uppercase; display: block; }
+        
+        .verde { color: var(--fort-color) !important; }
+        .rojo { color: #ff4444 !important; }
+        .loading { text-align: center; padding: 40px; color: var(--gold-accent); }
+        .btn-volver { display: block; text-decoration: none; background-color: #32613f; border: 1px dashed var(--gold-accent); border-radius: 8px; padding: 12px; color: white; text-transform: uppercase; font-weight: bold; text-align: center; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <h1>👑 LEADERBOARD LAPC 👑</h1>
-    <div class="subtitle" id="anioTitulo">Temporada Oficial</div>
+    <h1 id="tituloGral">👑 LEADERBOARD 👑</h1>
+    
+    <div class="switch-container">
+        <button class="switch-btn active-pts" id="btnPts" onclick="cambiarSolapa('pts')">🏆 PUNTOS</button>
+        <button class="switch-btn" id="btnFort" onclick="cambiarSolapa('fort')">💸 FORT</button>
+        <button class="switch-btn" id="btnHist" onclick="cambiarSolapa('hist')">📅 FECHAS</button>
+    </div>
+
+    <div id="controlesHistorial" class="hist-header" style="display:none;">
+        <select id="selectFecha" onchange="renderizarFechaEspecifica()"></select>
+    </div>
 
     <div class="ranking-container" id="rankingBox">
-        <div class="loading">⏳ Calculando posiciones...</div>
+        <div class="loading">⏳ Sincronizando paño...</div>
     </div>
 
     <a href="index.html" class="btn-volver">🔙 VOLVER AL PAÑO</a>
 
     <script>
-        // Le avisamos a Telegram que esta pantalla es nuestra
-        try { window.Telegram.WebApp.expand(); } catch(e) {}
-
-        // 🚨 A CARA DESCUBIERTA: TU LINK REAL Y EXACTO 🚨
         const googleWebhookUrl = "https://script.google.com/macros/s/AKfycbzaxfJJyLgAchlTBPrgM4GRfwSHmQyl3_UtU_FIi0Pt29ZjyLeW4uEfhLdopDBJkZAd/exec"; 
         const MI_TOKEN_SECRETO = "LAPC_2026_PRO_SECRET";
         
-        const anioActual = new Date().getFullYear();
-        document.getElementById('anioTitulo').innerText = "Temporada " + anioActual;
+        let dataPts = [], dataFort = [], dataHist = {};
 
-        async function cargarRanking() {
+        async function cargarTodo() {
             try {
                 let response = await fetch(googleWebhookUrl + "?token=" + MI_TOKEN_SECRETO);
-                let rawText = await response.text();
+                let data = await response.json();
+                dataPts = data.ranking;
+                dataFort = data.rankingFort;
+                dataHist = data.historialDetallado;
                 
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch (parseError) {
-                    document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Error de permisos. Google bloqueó la lectura.</div>`;
-                    return;
-                }
-                
-                const box = document.getElementById('rankingBox');
-                box.innerHTML = '';
-
-                if (data.error) {
-                    box.innerHTML = `<div class="loading" style="color:#ff4444;">❌ ${data.error}</div>`;
-                    return;
-                }
-
-                if (!data.ranking || data.ranking.length === 0) {
-                    box.innerHTML = `<div class="loading" style="color:#aaa;">No hay torneos registrados en ${anioActual}. Liquidá una fecha para inaugurar la tabla.</div>`;
-                    return;
-                }
-
-                let puesto = 1;
-                const medallas = ["🥇", "🥈", "🥉"];
-
-                data.ranking.forEach(jug => {
-                    let icono = puesto <= 3 ? medallas[puesto-1] : puesto + "º";
-                    let clasePodio = puesto <= 3 ? `rank-${puesto}` : "";
-                    
-                    box.innerHTML += `
-                        <div class="row ${clasePodio}">
-                            <div class="pos">${icono}</div>
-                            <div class="name">${jug.jugador}</div>
-                            <div>
-                                <div class="points">${jug.puntos.toLocaleString('es-AR')} pts</div>
-                                <div class="stats">${jug.torneos} torneos jugados</div>
-                            </div>
-                        </div>`;
-                    puesto++;
+                // Cargamos el select de fechas
+                const select = document.getElementById('selectFecha');
+                Object.keys(dataHist).reverse().forEach(id => {
+                    select.innerHTML += `<option value="${id}">${dataHist[id].etiqueta}</option>`;
                 });
 
-            } catch (error) {
-                document.getElementById('rankingBox').innerHTML = `<div class="loading" style="color:#ff4444;">❌ Falla de red: ${error.message}</div>`;
+                cambiarSolapa('pts');
+            } catch (e) { document.getElementById('rankingBox').innerHTML = "❌ Error de conexión."; }
+        }
+
+        function cambiarSolapa(tipo) {
+            const box = document.getElementById('rankingBox');
+            const titulo = document.getElementById('tituloGral');
+            const controles = document.getElementById('controlesHistorial');
+            
+            // Limpiar estilos
+            document.querySelectorAll('.switch-btn').forEach(b => b.classList.remove('active-pts', 'active-fort', 'active-hist'));
+            controles.style.display = (tipo === 'hist') ? 'block' : 'none';
+
+            if (tipo === 'pts') {
+                document.getElementById('btnPts').classList.add('active-pts');
+                titulo.innerText = "👑 LEADERBOARD 👑";
+                titulo.style.color = "var(--gold-accent)";
+                renderList(dataPts, 'pts');
+            } else if (tipo === 'fort') {
+                document.getElementById('btnFort').classList.add('active-fort');
+                titulo.innerText = "💸 RANKING FORT 💸";
+                titulo.style.color = "var(--fort-color)";
+                renderList(dataFort, 'fort');
+            } else {
+                document.getElementById('btnHist').classList.add('active-hist');
+                titulo.innerText = "📅 HISTORIAL 📅";
+                titulo.style.color = "var(--blue-accent)";
+                renderizarFechaEspecifica();
             }
         }
 
-        window.onload = cargarRanking;
+        function renderList(lista, modo) {
+            const box = document.getElementById('rankingBox');
+            box.innerHTML = '';
+            lista.forEach((jug, i) => {
+                let icono = (i < 3) ? ["🥇", "🥈", "🥉"][i] : (i + 1) + "º";
+                if (modo === 'pts') {
+                    box.innerHTML += `<div class="row"><div class="pos">${icono}</div><div class="name">${jug.jugador}</div><div><div class="points">${jug.puntos} pts</div><div class="stats">${jug.torneos} torneos</div></div></div>`;
+                } else {
+                    let color = jug.plata >= 0 ? 'verde' : 'rojo';
+                    box.innerHTML += `<div class="row"><div class="pos">${icono}</div><div class="name">${jug.jugador}</div><div class="points ${color}">$${jug.plata.toLocaleString()}</div></div>`;
+                }
+            });
+        }
+
+        function renderizarFechaEspecifica() {
+            const id = document.getElementById('selectFecha').value;
+            const box = document.getElementById('rankingBox');
+            if (!id || !dataHist[id]) return;
+            
+            const fecha = dataHist[id];
+            box.innerHTML = `<span class="torneo-label">🏆 Torneo 1</span>`;
+            fecha.t1.sort((a,b) => parseInt(a.puesto) - parseInt(b.puesto)).forEach(r => {
+                box.innerHTML += `<div class="row"><div class="pos">${r.puesto}</div><div class="name">${r.jugador}</div><div class="points">${r.puntos} pts</div></div>`;
+            });
+            
+            box.innerHTML += `<span class="torneo-label">🏆 Torneo 2</span>`;
+            fecha.t2.sort((a,b) => parseInt(a.puesto) - parseInt(b.puesto)).forEach(r => {
+                box.innerHTML += `<div class="row"><div class="pos">${r.puesto}</div><div class="name">${r.jugador}</div><div class="points">${r.puntos} pts</div></div>`;
+            });
+        }
+
+        window.onload = cargarTodo;
     </script>
 </body>
 </html>
